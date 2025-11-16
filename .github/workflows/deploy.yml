@@ -47,9 +47,6 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Create .nojekyll file
-        run: touch docs/.nojekyll
-
       - name: Commit and push to repository
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
