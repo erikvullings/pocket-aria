@@ -2,6 +2,10 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/pocket-aria/',
+  build: {
+    outDir: 'docs'
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
