@@ -1,4 +1,5 @@
 import m from 'mithril';
+import { TextArea } from 'mithril-materialized';
 import { Project, Genre, VoiceType, Score } from '@/models/types';
 import { saveProject, getProject, generateId } from '@/services/db';
 
@@ -225,15 +226,14 @@ export const ProjectEditor: m.FactoryComponent = () => {
               ),
 
               // Description
-              m('.input-field', [
-                m('textarea#description.materialize-textarea', {
-                  value: project.metadata.description || '',
-                  oninput: (e: Event) => {
-                    project.metadata.description = (e.target as HTMLTextAreaElement).value;
-                  }
-                }),
-                m('label[for=description]', { class: project.metadata.description ? 'active' : '' }, 'Description')
-              ])
+              m(TextArea, {
+                label: 'Description',
+                helperText: 'Additional notes about this song',
+                value: project.metadata.description || '',
+                oninput: (v: string) => {
+                  project.metadata.description = v;
+                }
+              })
             ])
           ])
         ])
@@ -307,16 +307,14 @@ export const ProjectEditor: m.FactoryComponent = () => {
           m('.card', [
             m('.card-content', [
               m('span.card-title', 'Lyrics'),
-              m('.input-field', [
-                m('textarea#lyrics.materialize-textarea', {
-                  value: project.lyrics?.content || '',
-                  oninput: (e: Event) => {
-                    handleLyricsChange((e.target as HTMLTextAreaElement).value);
-                  },
-                  rows: 10
-                }),
-                m('label[for=lyrics]', { class: project.lyrics?.content ? 'active' : '' }, 'Lyrics Text')
-              ])
+              m(TextArea, {
+                label: 'Lyrics Text',
+                helperText: 'Enter the lyrics in plain text, Markdown, or HTML',
+                value: project.lyrics?.content || '',
+                oninput: (v: string) => {
+                  handleLyricsChange(v);
+                }
+              })
             ])
           ])
         ])

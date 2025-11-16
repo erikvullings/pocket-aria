@@ -43,29 +43,41 @@ export const LibraryView: m.FactoryComponent = () => {
         ]),
         state.loading
           ? m('.progress', [m('.indeterminate')])
-          : m('.row', state.projects.map(project =>
-              m('.col.s12.m6.l4', { key: project.id }, [
-                m('.card', [
-                  m('.card-content', [
-                    m('span.card-title', project.metadata.title),
-                    project.metadata.composer && m('p', `Composer: ${project.metadata.composer}`),
-                    project.metadata.voiceType && m('p', `Voice: ${project.metadata.voiceType}`),
-                    project.metadata.genre && m('p.grey-text', project.metadata.genre)
-                  ]),
-                  m('.card-action', [
-                    m('a', {
-                      href: `#!/song/${project.id}`,
-                    }, 'View'),
-                    m('a', {
-                      href: `#!/song/${project.id}/edit`,
-                    }, 'Edit'),
-                    m('a.red-text', {
-                      onclick: () => handleDelete(project.id)
-                    }, 'Delete')
-                  ])
+          : state.projects.length === 0
+            ? m('.row', [
+                m('.col.s12.center-align', [
+                  m('img', {
+                    src: '/main.webp',
+                    alt: 'PocketAria',
+                    style: 'max-width: 100%; height: auto; margin: 40px 0;'
+                  }),
+                  m('h5.grey-text', 'No songs in your library yet'),
+                  m('p.grey-text', 'Click "New Song" to add your first piece')
                 ])
               ])
-            ))
+            : m('.row', state.projects.map(project =>
+                m('.col.s12.m6.l4', { key: project.id }, [
+                  m('.card', [
+                    m('.card-content', [
+                      m('span.card-title', project.metadata.title),
+                      project.metadata.composer && m('p', `Composer: ${project.metadata.composer}`),
+                      project.metadata.voiceType && m('p', `Voice: ${project.metadata.voiceType}`),
+                      project.metadata.genre && m('p.grey-text', project.metadata.genre)
+                    ]),
+                    m('.card-action', [
+                      m('a', {
+                        href: `#!/song/${project.id}`,
+                      }, 'View'),
+                      m('a', {
+                        href: `#!/song/${project.id}/edit`,
+                      }, 'Edit'),
+                      m('a.red-text', {
+                        onclick: () => handleDelete(project.id)
+                      }, 'Delete')
+                    ])
+                  ])
+                ])
+              ))
       ]);
     }
   };
