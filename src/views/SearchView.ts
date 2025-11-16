@@ -30,8 +30,7 @@ export const SearchView: m.FactoryComponent = () => {
     },
 
     view() {
-      const handleSearch = (e: Event) => {
-        e.preventDefault();
+      const handleSearch = () => {
         if (state.query.trim()) {
           state.results = searchProjects(state.query);
         } else {
@@ -43,16 +42,15 @@ export const SearchView: m.FactoryComponent = () => {
         m("h1", "Search"),
         m(".row", [
           m(".col.s12", [
-            m("form", { onsubmit: handleSearch }, [
-              m(TextInput, {
-                label: "Search",
-                iconName: "search",
-                placeholder: "Search by title, composer, tags...",
-                oninput: (v) => {
-                  state.query = v;
-                },
-              }),
-            ]),
+            m(TextInput, {
+              label: "Search",
+              iconName: "search",
+              placeholder: "Search by title, composer, tags...",
+              oninput: (v) => {
+                state.query = v;
+                handleSearch();
+              },
+            }),
           ]),
         ]),
 
