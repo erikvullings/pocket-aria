@@ -1,4 +1,5 @@
 import m from 'mithril';
+import { Button } from 'mithril-materialized';
 import { Project } from '@/models/types';
 import { getProject } from '@/services/db';
 import { AudioPlayer } from '@/components/AudioPlayer';
@@ -50,19 +51,23 @@ export const ProjectView: m.FactoryComponent = () => {
         m('h1', project.metadata.title),
         m('.row', [
           m('.col.s12', [
-            m('a.btn.waves-effect.waves-light', {
-              href: '#!/library',
-            }, [
-              m('i.material-icons.left', 'arrow_back'),
-              'Back to Library'
-            ]),
+            m(Button, {
+              label: 'Back to Library',
+              iconName: 'arrow_back',
+              onclick: () => m.route.set('/library')
+            }),
             ' ',
-            m('a.btn.waves-effect.waves-light', {
-              href: `#!/song/${project.id}/edit`,
-            }, [
-              m('i.material-icons.left', 'edit'),
-              'Edit'
-            ])
+            m(Button, {
+              label: 'Practice',
+              iconName: 'play_circle_outline',
+              onclick: () => m.route.set(`/song/${project.id}/practice`)
+            }),
+            ' ',
+            m(Button, {
+              label: 'Edit',
+              iconName: 'edit',
+              onclick: () => m.route.set(`/song/${project.id}/edit`)
+            })
           ])
         ]),
 

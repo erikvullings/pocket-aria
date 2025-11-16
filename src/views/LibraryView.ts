@@ -67,6 +67,12 @@ export const LibraryView: m.FactoryComponent = () => {
                     ]),
                     m('.card-action', [
                       m('a', {
+                        href: `#!/song/${project.id}/practice`,
+                      }, [
+                        m('i.material-icons.left', 'play_circle_outline'),
+                        'Practice'
+                      ]),
+                      m('a', {
                         href: `#!/song/${project.id}`,
                       }, 'View'),
                       m('a', {
