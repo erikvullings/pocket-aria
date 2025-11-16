@@ -1,5 +1,6 @@
 import m from "mithril";
 import { initDB } from "./services/db";
+import mainImage from "../public/main.webp";
 
 interface NavItem {
   href: string;
@@ -50,7 +51,7 @@ export const App: m.FactoryComponent = () => {
             m(".row", [
               m(".col.s12.m6", [
                 m("img", {
-                  src: "/main.webp",
+                  src: mainImage,
                   alt: "PocketAria",
                   style: "max-width: 100px; height: auto; margin-bottom: 10px;",
                 }),

@@ -1,6 +1,7 @@
 import m from 'mithril';
 import { Project } from '@/models/types';
 import { getAllProjects, deleteProject } from '@/services/db';
+import mainImage from '../../public/main.webp';
 
 interface LibraryState {
   projects: Project[];
@@ -47,7 +48,7 @@ export const LibraryView: m.FactoryComponent = () => {
             ? m('.row', [
                 m('.col.s12.center-align', [
                   m('img', {
-                    src: '/main.webp',
+                    src: mainImage,
                     alt: 'PocketAria',
                     style: 'max-width: 100%; height: auto; margin: 40px 0;'
                   }),
