@@ -1,6 +1,6 @@
 import m from "mithril";
 import { initDB } from "./services/db";
-import mainImage from "../public/main.webp";
+import mainImage from "./assets/main.webp";
 
 interface NavItem {
   href: string;

@@ -1,7 +1,7 @@
-import m from 'mithril';
-import { TextArea } from 'mithril-materialized';
-import { Project, Genre, VoiceType, Score } from '@/models/types';
-import { saveProject, getProject, generateId } from '@/services/db';
+import m from "mithril";
+import { TextArea } from "mithril-materialized";
+import { Project, Genre, VoiceType, Score } from "@/models/types";
+import { saveProject, getProject, generateId } from "@/services/db";
 
 interface ProjectEditorState {
   project: Project;
@@ -9,46 +9,56 @@ interface ProjectEditorState {
   isNew: boolean;
 }
 
-const genres: Genre[] = ['classical', 'pop', 'jazz', 'choir', 'folk', 'other'];
-const voiceTypes: VoiceType[] = ['soprano', 'mezzo', 'alto', 'tenor', 'baritone', 'bass', 'other'];
+const genres: Genre[] = ["classical", "pop", "jazz", "choir", "folk", "other"];
+const voiceTypes: VoiceType[] = [
+  "soprano",
+  "mezzo",
+  "alto",
+  "tenor",
+  "baritone",
+  "bass",
+  "other",
+];
 
 export const ProjectEditor: m.FactoryComponent = () => {
   let state: ProjectEditorState = {
     project: {
       id: generateId(),
       metadata: {
-        title: '',
-        createdAt: Date.now()
+        title: "",
+        createdAt: Date.now(),
       },
       scores: [],
-      cuePoints: []
+      cuePoints: [],
     },
     loading: false,
-    isNew: true
+    isNew: true,
   };
 
   return {
     async oninit() {
-      const projectId = m.route.param('id');
-      const isNew = projectId === 'new';
+      const projectId = m.route.param("id");
+      const isNew = projectId === "new";
 
-      state.project = isNew ? {
-        id: generateId(),
-        metadata: {
-          title: '',
-          createdAt: Date.now()
-        },
-        scores: [],
-        cuePoints: []
-      } : (await getProject(projectId)) || {
-        id: generateId(),
-        metadata: {
-          title: '',
-          createdAt: Date.now()
-        },
-        scores: [],
-        cuePoints: []
-      };
+      state.project = isNew
+        ? {
+            id: generateId(),
+            metadata: {
+              title: "",
+              createdAt: Date.now(),
+            },
+            scores: [],
+            cuePoints: [],
+          }
+        : (await getProject(projectId)) || {
+            id: generateId(),
+            metadata: {
+              title: "",
+              createdAt: Date.now(),
+            },
+            scores: [],
+            cuePoints: [],
+          };
       state.loading = false;
       state.isNew = isNew;
       m.redraw();
@@ -57,286 +67,386 @@ export const ProjectEditor: m.FactoryComponent = () => {
     view() {
       const { project } = state;
 
-    const handleSave = async () => {
-      state.loading = true;
-      try {
-        await saveProject(project);
-        m.route.set(`/project/${project.id}`);
-      } catch (error) {
-        alert(`Failed to save song: ${error}`);
-        state.loading = false;
-      }
-    };
-
-    const handleAudioUpload = async (e: Event) => {
-      const input = e.target as HTMLInputElement;
-      const file = input.files?.[0];
-      if (!file) return;
-
-      project.audioTrack = {
-        id: generateId(),
-        blob: file,
-        filename: file.name
-      };
-    };
-
-    const handleScoreUpload = async (e: Event) => {
-      const input = e.target as HTMLInputElement;
-      const file = input.files?.[0];
-      if (!file) return;
-
-      const type = file.type === 'application/pdf' ? 'pdf' :
-                   file.name.endsWith('.xml') || file.name.endsWith('.musicxml') ? 'musicxml' :
-                   'image';
-
-      const score: Score = {
-        id: generateId(),
-        type,
-        blob: file,
-        filename: file.name
-      };
-
-      project.scores.push(score);
-    };
-
-    const handleLyricsChange = (content: string) => {
-      if (!project.lyrics) {
-        project.lyrics = {
-          id: generateId(),
-          format: 'text',
-          content: ''
-        };
-      }
-      project.lyrics.content = content;
-    };
-
-    const handleTagInput = (e: KeyboardEvent) => {
-      const input = e.target as HTMLInputElement;
-      if (e.key === 'Enter' && input.value.trim()) {
-        e.preventDefault();
-        if (!project.metadata.tags) {
-          project.metadata.tags = [];
+      const handleSave = async () => {
+        state.loading = true;
+        try {
+          await saveProject(project);
+          m.route.set(`/project/${project.id}`);
+        } catch (error) {
+          alert(`Failed to save song: ${error}`);
+          state.loading = false;
         }
-        project.metadata.tags.push(input.value.trim());
-        input.value = '';
-      }
-    };
+      };
 
-    const removeTag = (index: number) => {
-      project.metadata.tags?.splice(index, 1);
-    };
+      const handleAudioUpload = async (e: Event) => {
+        const input = e.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
 
-    const removeScore = (index: number) => {
-      project.scores.splice(index, 1);
-    };
+        project.audioTrack = {
+          id: generateId(),
+          blob: file,
+          filename: file.name,
+        };
+      };
 
-    return m('.project-editor.container', [
-      m('h1', state.isNew ? 'New Song' : 'Edit Song'),
+      const handleScoreUpload = async (e: Event) => {
+        const input = e.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
 
-      m('.row', [
-        m('.col.s12', [
-          m('.card', [
-            m('.card-content', [
-              m('span.card-title', 'Basic Information'),
+        const type =
+          file.type === "application/pdf"
+            ? "pdf"
+            : file.name.endsWith(".xml") || file.name.endsWith(".musicxml")
+            ? "musicxml"
+            : "image";
 
-              // Title
-              m('.input-field', [
-                m('input#title[type=text]', {
-                  value: project.metadata.title,
-                  oninput: (e: Event) => {
-                    project.metadata.title = (e.target as HTMLInputElement).value;
+        const score: Score = {
+          id: generateId(),
+          type,
+          blob: file,
+          filename: file.name,
+        };
+
+        project.scores.push(score);
+      };
+
+      const handleLyricsChange = (content: string) => {
+        if (!project.lyrics) {
+          project.lyrics = {
+            id: generateId(),
+            format: "text",
+            content: "",
+          };
+        }
+        project.lyrics.content = content;
+      };
+
+      const handleTagInput = (e: KeyboardEvent) => {
+        const input = e.target as HTMLInputElement;
+        if (e.key === "Enter" && input.value.trim()) {
+          e.preventDefault();
+          if (!project.metadata.tags) {
+            project.metadata.tags = [];
+          }
+          project.metadata.tags.push(input.value.trim());
+          input.value = "";
+        }
+      };
+
+      const removeTag = (index: number) => {
+        project.metadata.tags?.splice(index, 1);
+      };
+
+      const removeScore = (index: number) => {
+        project.scores.splice(index, 1);
+      };
+
+      return m(".project-editor.container", [
+        m("h1", state.isNew ? "New Song" : "Edit Song"),
+
+        m(".row", [
+          m(".col.s12", [
+            m(".card", [
+              m(".card-content", [
+                m("span.card-title", "Basic Information"),
+
+                // Title
+                m(".input-field", [
+                  m("input#title[type=text]", {
+                    value: project.metadata.title,
+                    oninput: (e: Event) => {
+                      project.metadata.title = (
+                        e.target as HTMLInputElement
+                      ).value;
+                    },
+                    required: true,
+                  }),
+                  m(
+                    "label[for=title]",
+                    { class: project.metadata.title ? "active" : "" },
+                    "Title *"
+                  ),
+                ]),
+
+                // Composer
+                m(".input-field", [
+                  m("input#composer[type=text]", {
+                    value: project.metadata.composer || "",
+                    oninput: (e: Event) => {
+                      project.metadata.composer = (
+                        e.target as HTMLInputElement
+                      ).value;
+                    },
+                  }),
+                  m(
+                    "label[for=composer]",
+                    { class: project.metadata.composer ? "active" : "" },
+                    "Composer"
+                  ),
+                ]),
+
+                // Genre
+                m(".input-field", [
+                  m(
+                    "select.browser-default",
+                    {
+                      value: project.metadata.genre || "",
+                      onchange: (e: Event) => {
+                        const value = (e.target as HTMLSelectElement).value;
+                        project.metadata.genre = value
+                          ? (value as Genre)
+                          : undefined;
+                      },
+                    },
+                    [
+                      m("option", { value: "" }, "Select Genre"),
+                      ...genres.map((genre) =>
+                        m("option", { value: genre }, genre)
+                      ),
+                    ]
+                  ),
+                ]),
+
+                // Voice Type
+                m(".input-field", [
+                  m(
+                    "select.browser-default",
+                    {
+                      value: project.metadata.voiceType || "",
+                      onchange: (e: Event) => {
+                        const value = (e.target as HTMLSelectElement).value;
+                        project.metadata.voiceType = value
+                          ? (value as VoiceType)
+                          : undefined;
+                      },
+                    },
+                    [
+                      m("option", { value: "" }, "Select Voice Type"),
+                      ...voiceTypes.map((type) =>
+                        m("option", { value: type }, type)
+                      ),
+                    ]
+                  ),
+                ]),
+
+                // Year
+                m(".input-field", [
+                  m("input#year[type=number]", {
+                    value: project.metadata.year || "",
+                    oninput: (e: Event) => {
+                      const value = (e.target as HTMLInputElement).value;
+                      project.metadata.year = value
+                        ? parseInt(value)
+                        : undefined;
+                    },
+                  }),
+                  m(
+                    "label[for=year]",
+                    { class: project.metadata.year ? "active" : "" },
+                    "Year"
+                  ),
+                ]),
+
+                // Tags
+                m(".input-field", [
+                  m("input#tags[type=text]", {
+                    onkeydown: handleTagInput,
+                    placeholder: "Press Enter to add tag",
+                  }),
+                  m("label[for=tags]", "Tags"),
+                ]),
+                project.metadata.tags &&
+                  project.metadata.tags.length > 0 &&
+                  m(
+                    ".chips",
+                    project.metadata.tags.map((tag, idx) =>
+                      m(".chip", { key: idx }, [
+                        tag,
+                        m(
+                          "i.material-icons.close",
+                          {
+                            onclick: () => removeTag(idx),
+                          },
+                          "close"
+                        ),
+                      ])
+                    )
+                  ),
+
+                // Description
+                m(TextArea, {
+                  label: "Description",
+                  helperText: "Additional notes about this song",
+                  value: project.metadata.description || "",
+                  oninput: (v: string) => {
+                    project.metadata.description = v;
                   },
-                  required: true
                 }),
-                m('label[for=title]', { class: project.metadata.title ? 'active' : '' }, 'Title *')
               ]),
-
-              // Composer
-              m('.input-field', [
-                m('input#composer[type=text]', {
-                  value: project.metadata.composer || '',
-                  oninput: (e: Event) => {
-                    project.metadata.composer = (e.target as HTMLInputElement).value;
-                  }
-                }),
-                m('label[for=composer]', { class: project.metadata.composer ? 'active' : '' }, 'Composer')
-              ]),
-
-              // Genre
-              m('.input-field', [
-                m('select.browser-default', {
-                  value: project.metadata.genre || '',
-                  onchange: (e: Event) => {
-                    const value = (e.target as HTMLSelectElement).value;
-                    project.metadata.genre = value ? value as Genre : undefined;
-                  }
-                }, [
-                  m('option', { value: '' }, 'Select Genre'),
-                  ...genres.map(genre =>
-                    m('option', { value: genre }, genre)
-                  )
-                ])
-              ]),
-
-              // Voice Type
-              m('.input-field', [
-                m('select.browser-default', {
-                  value: project.metadata.voiceType || '',
-                  onchange: (e: Event) => {
-                    const value = (e.target as HTMLSelectElement).value;
-                    project.metadata.voiceType = value ? value as VoiceType : undefined;
-                  }
-                }, [
-                  m('option', { value: '' }, 'Select Voice Type'),
-                  ...voiceTypes.map(type =>
-                    m('option', { value: type }, type)
-                  )
-                ])
-              ]),
-
-              // Year
-              m('.input-field', [
-                m('input#year[type=number]', {
-                  value: project.metadata.year || '',
-                  oninput: (e: Event) => {
-                    const value = (e.target as HTMLInputElement).value;
-                    project.metadata.year = value ? parseInt(value) : undefined;
-                  }
-                }),
-                m('label[for=year]', { class: project.metadata.year ? 'active' : '' }, 'Year')
-              ]),
-
-              // Tags
-              m('.input-field', [
-                m('input#tags[type=text]', {
-                  onkeydown: handleTagInput,
-                  placeholder: 'Press Enter to add tag'
-                }),
-                m('label[for=tags]', 'Tags')
-              ]),
-              project.metadata.tags && project.metadata.tags.length > 0 && m('.chips',
-                project.metadata.tags.map((tag, idx) =>
-                  m('.chip', { key: idx }, [
-                    tag,
-                    m('i.material-icons.close', {
-                      onclick: () => removeTag(idx)
-                    }, 'close')
-                  ])
-                )
-              ),
-
-              // Description
-              m(TextArea, {
-                label: 'Description',
-                helperText: 'Additional notes about this song',
-                value: project.metadata.description || '',
-                oninput: (v: string) => {
-                  project.metadata.description = v;
-                }
-              })
-            ])
-          ])
-        ])
-      ]),
-
-      // Audio Upload
-      m('.row', [
-        m('.col.s12', [
-          m('.card', [
-            m('.card-content', [
-              m('span.card-title', 'Audio Track'),
-              m('.file-field.input-field', [
-                m('.btn', [
-                  m('span', 'Upload Audio'),
-                  m('input[type=file][accept=audio/*]', {
-                    onchange: handleAudioUpload
-                  })
-                ]),
-                m('.file-path-wrapper', [
-                  m('input.file-path[type=text]', {
-                    placeholder: 'MP3, WAV, M4A',
-                    value: project.audioTrack?.filename || ''
-                  })
-                ])
-              ]),
-              project.audioTrack && m('p.green-text', `✓ ${project.audioTrack.filename}`)
-            ])
-          ])
-        ])
-      ]),
-
-      // Score Upload
-      m('.row', [
-        m('.col.s12', [
-          m('.card', [
-            m('.card-content', [
-              m('span.card-title', 'Scores'),
-              m('.file-field.input-field', [
-                m('.btn', [
-                  m('span', 'Upload Score'),
-                  m('input[type=file][accept=.pdf,.xml,.musicxml,image/*]', {
-                    onchange: handleScoreUpload
-                  })
-                ]),
-                m('.file-path-wrapper', [
-                  m('input.file-path[type=text]', {
-                    placeholder: 'PDF, MusicXML, or Image'
-                  })
-                ])
-              ]),
-              project.scores.length > 0 && m('ul.collection',
-                project.scores.map((score, idx) =>
-                  m('li.collection-item', { key: score.id }, [
-                    m('span', `${score.filename} (${score.type})`),
-                    m('a.secondary-content', {
-                      onclick: () => removeScore(idx)
-                    }, [
-                      m('i.material-icons.red-text', 'delete')
-                    ])
-                  ])
-                )
-              )
-            ])
-          ])
-        ])
-      ]),
-
-      // Lyrics
-      m('.row', [
-        m('.col.s12', [
-          m('.card', [
-            m('.card-content', [
-              m('span.card-title', 'Lyrics'),
-              m(TextArea, {
-                label: 'Lyrics Text',
-                helperText: 'Enter the lyrics in plain text, Markdown, or HTML',
-                value: project.lyrics?.content || '',
-                oninput: (v: string) => {
-                  handleLyricsChange(v);
-                }
-              })
-            ])
-          ])
-        ])
-      ]),
-
-      // Actions
-      m('.row', [
-        m('.col.s12', [
-          m('button.btn.waves-effect.waves-light', {
-            onclick: handleSave,
-            disabled: state.loading || !project.metadata.title
-          }, [
-            m('i.material-icons.left', 'save'),
-            state.loading ? 'Saving...' : 'Save Song'
+            ]),
           ]),
-          ' ',
-          m('a.btn.grey.waves-effect.waves-light', {
-            href: state.isNew ? '#!/library' : `#!/song/${project.id}`,
-          }, 'Cancel')
-        ])
-      ])
-    ]);
-    }
+        ]),
+
+        // Audio Upload
+        m(".row", [
+          m(".col.s12", [
+            m(".card", [
+              m(".card-content", [
+                m("span.card-title", "Audio Track"),
+                m(".file-field.input-field", [
+                  m(".btn", [
+                    m("span", "Upload Audio"),
+                    m("input[type=file][accept=audio/*]", {
+                      onchange: handleAudioUpload,
+                    }),
+                  ]),
+                  m(".file-path-wrapper", [
+                    m("input.file-path[type=text]", {
+                      placeholder: "MP3, WAV, M4A",
+                      value: project.audioTrack?.filename || "",
+                    }),
+                  ]),
+                ]),
+                project.audioTrack &&
+                  m("p.green-text", `✓ ${project.audioTrack.filename}`),
+              ]),
+            ]),
+          ]),
+        ]),
+
+        // Score Upload
+        m(".row", [
+          m(".col.s12", [
+            m(".card", [
+              m(".card-content", [
+                m("span.card-title", "Scores"),
+                m(".file-field.input-field", [
+                  m(".btn", [
+                    m("span", "Upload Score"),
+                    m("input[type=file][accept=.pdf,.xml,.musicxml,image/*]", {
+                      onchange: handleScoreUpload,
+                    }),
+                  ]),
+                  m(".file-path-wrapper", [
+                    m("input.file-path[type=text]", {
+                      placeholder: "PDF, MusicXML, or Image",
+                    }),
+                  ]),
+                ]),
+                project.scores.length > 0 &&
+                  m(
+                    "ul.collection",
+                    project.scores.map((score, idx) =>
+                      m("li.collection-item", { key: score.id }, [
+                        m("span", `${score.filename} (${score.type})`),
+                        m(
+                          "a.secondary-content",
+                          {
+                            onclick: () => removeScore(idx),
+                          },
+                          [m("i.material-icons.red-text", "delete")]
+                        ),
+                      ])
+                    )
+                  ),
+              ]),
+            ]),
+          ]),
+        ]),
+
+        // Lyrics
+        m(".row", [
+          m(".col.s12", [
+            m(".card", [
+              m(".card-content.row", [
+                m("span.card-title", "Lyrics"),
+                m(TextArea, {
+                  className: "col s12 m6",
+                  label: "Lyrics Text",
+                  helperText:
+                    "Enter the lyrics in plain text, Markdown, or HTML",
+                  value: project.lyrics?.content || "",
+                  oninput: (v: string) => {
+                    handleLyricsChange(v);
+                  },
+                }),
+
+                // Translation
+                m(TextArea, {
+                  className: "col s12 m6",
+                  label: "Translation",
+                  helperText: "Optional translation of the lyrics",
+                  value: project.lyrics?.translation || "",
+                  oninput: (v: string) => {
+                    if (!project.lyrics) {
+                      project.lyrics = {
+                        id: generateId(),
+                        format: "text",
+                        content: "",
+                      };
+                    }
+                    project.lyrics.translation = v || undefined;
+                  },
+                }),
+
+                // Translation Language
+                m(".input-field.col.s12", [
+                  m("input#translationLanguage[type=text]", {
+                    value: project.lyrics?.translationLanguage || "",
+                    oninput: (e: Event) => {
+                      if (!project.lyrics) {
+                        project.lyrics = {
+                          id: generateId(),
+                          format: "text",
+                          content: "",
+                        };
+                      }
+                      const value = (e.target as HTMLInputElement).value;
+                      project.lyrics.translationLanguage = value || undefined;
+                    },
+                  }),
+                  m(
+                    "label[for=translationLanguage]",
+                    {
+                      class: project.lyrics?.translationLanguage
+                        ? "active"
+                        : "",
+                    },
+                    "Translation Language (e.g., English, German)"
+                  ),
+                ]),
+              ]),
+            ]),
+          ]),
+        ]),
+
+        // Actions
+        m(".row", [
+          m(".col.s12", [
+            m(
+              "button.btn.waves-effect.waves-light",
+              {
+                onclick: handleSave,
+                disabled: state.loading || !project.metadata.title,
+              },
+              [
+                m("i.material-icons.left", "save"),
+                state.loading ? "Saving..." : "Save Song",
+              ]
+            ),
+            " ",
+            m(
+              "a.btn.grey.waves-effect.waves-light",
+              {
+                href: state.isNew ? "#!/library" : `#!/song/${project.id}`,
+              },
+              "Cancel"
+            ),
+          ]),
+        ]),
+      ]);
+    },
   };
 };

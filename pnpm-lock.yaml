@@ -29,10 +29,10 @@ importers:
       pdfjs-dist:
         specifier: ^5.4.394
         version: 5.4.394
+      slimdown-js:
+        specifier: 1.1.3
+        version: 1.1.3
     devDependencies:
-      '@types/lz-string':
-        specifier: ^1.5.0
-        version: 1.5.0
       '@types/mithril':
         specifier: ^2.2.7
         version: 2.2.7
@@ -974,10 +974,6 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
-
-  '@types/lz-string@1.5.0':
-    resolution: {integrity: sha512-s84fKOrzqqNCAPljhVyC5TjAo6BH4jKHw9NRNFNiRUY5QSgZCmVm5XILlWbisiKl+0OcS7eWihmKGS5akc2iQw==}
-    deprecated: This is a stub types definition. lz-string provides its own type definitions, so you do not need this installed.
 
   '@types/mithril@2.2.7':
     resolution: {integrity: sha512-uetxoYizBMHPELl6DSZUfO6Q/aOm+h0NUCv9bVAX2iAxfrdBSOvU9KKFl+McTtxR13F+BReYLY814pJsZvnSxg==}
@@ -2045,6 +2041,10 @@ packages:
 
   simple-get@4.0.1:
     resolution: {integrity: sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==}
+
+  slimdown-js@1.1.3:
+    resolution: {integrity: sha512-HztbQWhgqa+ENrOusZd7AQbpwIFcYmzNG63cXndalT7+JFfDGCXS8JIXreiqyw+N8UXuWqefdtW/TavNt9Qjwg==}
+    engines: {node: '>=16'}
 
   smart-buffer@4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
@@ -3380,10 +3380,6 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/lz-string@1.5.0':
-    dependencies:
-      lz-string: 1.5.0
-
   '@types/mithril@2.2.7': {}
 
   '@types/resolve@1.20.2': {}
@@ -4700,6 +4696,8 @@ snapshots:
       once: 1.4.0
       simple-concat: 1.0.1
     optional: true
+
+  slimdown-js@1.1.3: {}
 
   smart-buffer@4.2.0:
     optional: true

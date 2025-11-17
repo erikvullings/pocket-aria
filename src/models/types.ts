@@ -38,6 +38,8 @@ export interface Lyrics {
   id: string;
   format: LyricsFormat;
   content: string;
+  translation?: string;
+  translationLanguage?: string;
 }
 
 export interface AudioTrack {

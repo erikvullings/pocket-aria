@@ -1,7 +1,8 @@
-import m from 'mithril';
-import { Project } from '@/models/types';
-import { getAllProjects, deleteProject } from '@/services/db';
-import mainImage from '../../public/main.webp';
+import m from "mithril";
+import { Project } from "@/models/types";
+import { getAllProjects, deleteProject } from "@/services/db";
+import mainImage from "../assets/main.webp";
+import { IconButton } from "mithril-materialized";
 
 interface LibraryState {
   projects: Project[];
@@ -11,7 +12,7 @@ interface LibraryState {
 export const LibraryView: m.FactoryComponent = () => {
   let state: LibraryState = {
     projects: [],
-    loading: true
+    loading: true,
   };
 
   return {
@@ -23,69 +24,83 @@ export const LibraryView: m.FactoryComponent = () => {
 
     view() {
       const handleDelete = async (id: string) => {
-        if (confirm('Are you sure you want to delete this project?')) {
+        if (confirm("Are you sure you want to delete this project?")) {
           await deleteProject(id);
-          state.projects = state.projects.filter(p => p.id !== id);
+          state.projects = state.projects.filter((p) => p.id !== id);
           m.redraw();
         }
       };
 
-      return m('.library-view.container', [
-        m('h1', 'Library'),
-        m('.row', [
-          m('.col.s12', [
-            m('a.btn.waves-effect.waves-light', {
-              href: '#!/song/new',
-            }, [
-              m('i.material-icons.left', 'add'),
-              'New Song'
-            ])
-          ])
+      return m(".library-view.container", [
+        m("h1", "Library"),
+        m(".row", [
+          m(".col.s12", [
+            m(
+              "a.btn.waves-effect.waves-light",
+              {
+                href: "#!/song/new",
+              },
+              [m("i.material-icons.left", "add"), "New Song"]
+            ),
+          ]),
         ]),
         state.loading
-          ? m('.progress', [m('.indeterminate')])
+          ? m(".progress", [m(".indeterminate")])
           : state.projects.length === 0
-            ? m('.row', [
-                m('.col.s12.center-align', [
-                  m('img', {
-                    src: mainImage,
-                    alt: 'PocketAria',
-                    style: 'max-width: 100%; height: auto; margin: 40px 0;'
-                  }),
-                  m('h5.grey-text', 'No songs in your library yet'),
-                  m('p.grey-text', 'Click "New Song" to add your first piece')
-                ])
-              ])
-            : m('.row', state.projects.map(project =>
-                m('.col.s12.m6.l4', { key: project.id }, [
-                  m('.card', [
-                    m('.card-content', [
-                      m('span.card-title', project.metadata.title),
-                      project.metadata.composer && m('p', `Composer: ${project.metadata.composer}`),
-                      project.metadata.voiceType && m('p', `Voice: ${project.metadata.voiceType}`),
-                      project.metadata.genre && m('p.grey-text', project.metadata.genre)
+          ? m(".row", [
+              m(".col.s12.center-align", [
+                m("img", {
+                  src: mainImage,
+                  alt: "PocketAria",
+                  style: "max-width: 100%; height: auto; margin: 40px 0;",
+                }),
+                m("h5.grey-text", "No songs in your library yet"),
+                m("p.grey-text", 'Click "New Song" to add your first piece'),
+              ]),
+            ])
+          : m(
+              ".row",
+              state.projects.map((project) =>
+                m(".col.s12.m6.l4", { key: project.id }, [
+                  m(".card", [
+                    m(".card-content", [
+                      m("span.card-title", project.metadata.title),
+                      project.metadata.composer &&
+                        m("p", `Composer: ${project.metadata.composer}`),
+                      project.metadata.voiceType &&
+                        m("p", `Voice: ${project.metadata.voiceType}`),
+                      project.metadata.genre &&
+                        m("p.grey-text", project.metadata.genre),
                     ]),
-                    m('.card-action', [
-                      m('a', {
-                        href: `#!/song/${project.id}/practice`,
-                      }, [
-                        m('i.material-icons.left', 'play_circle_outline'),
-                        'Practice'
-                      ]),
-                      m('a', {
-                        href: `#!/song/${project.id}`,
-                      }, 'View'),
-                      m('a', {
-                        href: `#!/song/${project.id}/edit`,
-                      }, 'Edit'),
-                      m('a.red-text', {
-                        onclick: () => handleDelete(project.id)
-                      }, 'Delete')
-                    ])
-                  ])
+                    m(".card-action", [
+                      m(IconButton, {
+                        title: "Practice",
+                        onclick: () =>
+                          m.route.set(`/song/${project.id}/practice`),
+                        iconName: "play_circle_outline",
+                      }),
+                      m(IconButton, {
+                        title: "View",
+                        onclick: () => m.route.set(`/song/${project.id}`),
+                        iconName: "remove_red_eye",
+                      }),
+                      m(IconButton, {
+                        title: "Edit",
+                        onclick: () => m.route.set(`/song/${project.id}/edit`),
+                        iconName: "edit",
+                      }),
+                      m(IconButton, {
+                        title: "Delete",
+                        onclick: () => handleDelete(project.id),
+                        iconName: "delete",
+                        className: "red-text",
+                      }),
+                    ]),
+                  ]),
                 ])
-              ))
+              )
+            ),
       ]);
-    }
+    },
   };
 };
