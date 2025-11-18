@@ -212,8 +212,8 @@ export const ProjectEditor: m.FactoryComponent = () => {
           m(".col.s12", [
             m(".card", [
               m(".card-content.row", [
-                m("span.card-title", "Audio Track"),
-                m(".file-field.input-field", [
+                m("span.card-title.col.s12", "Audio Track"),
+                m(".file-field.input-field.col.s12", [
                   m(".btn", [
                     m("span", "Upload Audio"),
                     m("input[type=file][accept=audio/*]", {
@@ -228,7 +228,7 @@ export const ProjectEditor: m.FactoryComponent = () => {
                   ]),
                 ]),
                 project.audioTrack &&
-                  m("p.green-text", `✓ ${project.audioTrack.filename}`),
+                  m("p.green-text.col.s12", `✓ ${project.audioTrack.filename}`),
               ]),
             ]),
           ]),
@@ -239,8 +239,8 @@ export const ProjectEditor: m.FactoryComponent = () => {
           m(".col.s12", [
             m(".card", [
               m(".card-content.row", [
-                m("span.card-title", "Scores"),
-                m(".file-field.input-field", [
+                m("span.card-title.col.s12", "Scores"),
+                m(".file-field.input-field.col.s12", [
                   m(".btn", [
                     m("span", "Upload Score"),
                     m("input[type=file][accept=.pdf,.xml,.musicxml,image/*]", {
@@ -279,7 +279,7 @@ export const ProjectEditor: m.FactoryComponent = () => {
           m(".col.s12", [
             m(".card", [
               m(".card-content.row", [
-                m("span.card-title", "Lyrics"),
+                m("span.card-title.col.s12", "Lyrics"),
                 m(TextArea, {
                   className: "col s12 m6",
                   label: "Lyrics Text",
@@ -350,11 +350,14 @@ export const ProjectEditor: m.FactoryComponent = () => {
               onclick: handleSave,
             }),
             " ",
-            !state.isNew && project.audioTrack && project.lyrics && m(Button, {
-              label: "Add Timestamps",
-              iconName: "schedule",
-              onclick: () => m.route.set(`/song/${project.id}/lrc-editor`),
-            }),
+            !state.isNew &&
+              project.audioTrack &&
+              project.lyrics &&
+              m(Button, {
+                label: "Timestamps",
+                iconName: "schedule",
+                onclick: () => m.route.set(`/song/${project.id}/lrc-editor`),
+              }),
             " ",
             m(Button, {
               className: "grey",
