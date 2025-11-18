@@ -150,20 +150,35 @@
       height: calc(100vh - 120px);
       overflow: hidden;
     }
-    .practice-view:has(.bookmarks-container) .practice-content {
-      height: calc(100vh - 170px);
+    .practice-view:has(.seek-bar-container) .practice-content {
+      height: calc(100vh - 140px);
     }
-    .practice-view:has(.bookmarks-container) .practice-empty {
-      height: calc(100vh - 170px);
+    .practice-view:has(.seek-bar-container) .practice-empty {
+      height: calc(100vh - 140px);
     }
-    .practice-view:has(.bookmarks-container) .lyrics-container {
-      height: calc(100vh - 170px);
+    .practice-view:has(.seek-bar-container) .lyrics-container {
+      height: calc(100vh - 140px);
     }
-    .practice-view:has(.bookmarks-container) .score-container {
-      height: calc(100vh - 170px);
+    .practice-view:has(.seek-bar-container) .score-container {
+      height: calc(100vh - 140px);
     }
-    .practice-view:has(.bookmarks-container) .score-container-centered {
-      height: calc(100vh - 170px);
+    .practice-view:has(.seek-bar-container) .score-container-centered {
+      height: calc(100vh - 140px);
+    }
+    .practice-view:has(.seek-bar-container):has(.bookmarks-container) .practice-content {
+      height: calc(100vh - 190px);
+    }
+    .practice-view:has(.seek-bar-container):has(.bookmarks-container) .practice-empty {
+      height: calc(100vh - 190px);
+    }
+    .practice-view:has(.seek-bar-container):has(.bookmarks-container) .lyrics-container {
+      height: calc(100vh - 190px);
+    }
+    .practice-view:has(.seek-bar-container):has(.bookmarks-container) .score-container {
+      height: calc(100vh - 190px);
+    }
+    .practice-view:has(.seek-bar-container):has(.bookmarks-container) .score-container-centered {
+      height: calc(100vh - 190px);
     }
     .practice-footer {
       height: 60px;
@@ -284,6 +299,87 @@
     }
     .bookmark-delete:hover i {
       color: #ffffff;
+    }
+    /* Seek bar styling */
+    .seek-bar-container {
+      background: #212121;
+      padding: 0 15px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+    .seek-bar {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+    }
+    /* Track */
+    .seek-bar::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(
+        to right,
+        #1976d2 0%,
+        #1976d2 var(--progress, 0%),
+        #4a4a4a var(--progress, 0%),
+        #4a4a4a 100%
+      );
+      border-radius: 2px;
+    }
+    .seek-bar::-moz-range-track {
+      width: 100%;
+      height: 4px;
+      background: #4a4a4a;
+      border-radius: 2px;
+    }
+    .seek-bar::-moz-range-progress {
+      height: 4px;
+      background: #1976d2;
+      border-radius: 2px;
+    }
+    /* Thumb */
+    .seek-bar::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #ffffff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .seek-bar::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: #ffffff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    /* Hover effects */
+    .seek-bar:hover::-webkit-slider-thumb {
+      transform: scale(1.2);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    }
+    .seek-bar:hover::-moz-range-thumb {
+      transform: scale(1.2);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    }
+    .seek-bar:active::-webkit-slider-thumb {
+      transform: scale(1.3);
+      background: #1976d2;
+    }
+    .seek-bar:active::-moz-range-thumb {
+      transform: scale(1.3);
+      background: #1976d2;
     }
     /* Audio device selector styling */
     .audio-device-selector-wrapper {

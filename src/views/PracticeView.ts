@@ -45,7 +45,9 @@ export const PracticeView: m.FactoryComponent = () => {
     const secs = Math.floor(seconds % 60);
 
     if (hours > 0) {
-      return `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+      return `${hours}:${mins.toString().padStart(2, "0")}:${secs
+        .toString()
+        .padStart(2, "0")}`;
     }
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
@@ -67,6 +69,15 @@ export const PracticeView: m.FactoryComponent = () => {
       state.audio.currentTime = 0;
       state.isPlaying = false;
       state.currentTime = 0;
+    }
+  };
+
+  const handleSeek = (e: Event) => {
+    if (state.audio) {
+      const target = e.target as HTMLInputElement;
+      const time = parseFloat(target.value);
+      state.audio.currentTime = time;
+      state.currentTime = time;
     }
   };
 
@@ -229,7 +240,9 @@ export const PracticeView: m.FactoryComponent = () => {
         default:
           const lines = content.split("\n");
           return lines.flatMap((line, idx) =>
-            idx < lines.length - 1 ? [line || '\u00A0', m("br")] : [line || '\u00A0']
+            idx < lines.length - 1
+              ? [line || "\u00A0", m("br")]
+              : [line || "\u00A0"]
           );
       }
     };
@@ -244,7 +257,10 @@ export const PracticeView: m.FactoryComponent = () => {
           ? m(".row.lyrics-row", [
               m(".col.s12.m6.lyrics-col", [
                 m("h4.lyrics-heading", "Original"),
-                m(".lyrics-content", renderContent(lyrics.content, lyrics.format)),
+                m(
+                  ".lyrics-content",
+                  renderContent(lyrics.content, lyrics.format)
+                ),
               ]),
               m(".col.s12.m6.lyrics-col", [
                 m(
@@ -265,7 +281,7 @@ export const PracticeView: m.FactoryComponent = () => {
             ),
       ]
     );
-  };;
+  };
 
   const renderScore = (score: Score) => {
     const url = URL.createObjectURL(score.blob);
@@ -326,7 +342,7 @@ export const PracticeView: m.FactoryComponent = () => {
         ]
       );
     }
-  };;
+  };
 
   return {
     async oninit() {
@@ -372,7 +388,10 @@ export const PracticeView: m.FactoryComponent = () => {
       // Add click handler to close device selector when clicking outside
       const handleClickOutside = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
-        if (state.showDeviceSelector && !target.closest(".audio-device-selector-wrapper")) {
+        if (
+          state.showDeviceSelector &&
+          !target.closest(".audio-device-selector-wrapper")
+        ) {
           state.showDeviceSelector = false;
           m.redraw();
         }
@@ -551,6 +570,26 @@ export const PracticeView: m.FactoryComponent = () => {
             ),
           ]),
 
+        // Seek bar section
+        hasAudio &&
+          m(".seek-bar-container", [
+            m("input.seek-bar", {
+              type: "range",
+              min: 0,
+              max: state.duration || 0,
+              step: 0.1,
+              value: state.currentTime,
+              style: {
+                "--progress": `${
+                  state.duration > 0
+                    ? (state.currentTime / state.duration) * 100
+                    : 0
+                }%`,
+              },
+              oninput: handleSeek,
+            }),
+          ]),
+
         // Content area
         m(".practice-content", [
           state.viewMode === "lyrics" && hasLyrics
@@ -562,7 +601,10 @@ export const PracticeView: m.FactoryComponent = () => {
               state.project.scores[state.currentScorePage]
             ? renderScore(state.project.scores[state.currentScorePage])
             : m(".center-align.practice-empty", [
-                m("p.practice-empty-text", "No lyrics or scores available for this song"),
+                m(
+                  "p.practice-empty-text",
+                  "No lyrics or scores available for this song"
+                ),
               ]),
         ]),
 
