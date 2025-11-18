@@ -49,10 +49,9 @@ export const LibraryView: m.FactoryComponent = () => {
           : state.projects.length === 0
           ? m(".row", [
               m(".col.s12.center-align", [
-                m("img", {
+                m("img.logo-large", {
                   src: mainImage,
                   alt: "PocketAria",
-                  style: "max-width: 100%; height: auto; margin: 40px 0;",
                 }),
                 m("h5.grey-text", "No songs in your library yet"),
                 m("p.grey-text", 'Click "New Song" to add your first piece'),

@@ -50,10 +50,9 @@ export const App: m.FactoryComponent = () => {
           m(".container", [
             m(".row", [
               m(".col.s12.m6", [
-                m("img", {
+                m("img.logo-small", {
                   src: mainImage,
                   alt: "PocketAria",
-                  style: "max-width: 100px; height: auto; margin-bottom: 10px;",
                 }),
               ]),
               m(".col.s12.m6", [

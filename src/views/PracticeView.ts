@@ -147,73 +147,35 @@ export const PracticeView: m.FactoryComponent = () => {
     return m(
       ".lyrics-container",
       {
-        style: `font-size: ${state.zoomLevel}em; padding: 20px; overflow-y: auto; height: calc(100vh - 120px); background: #1a1a1a; color: #ffffff;`,
+        style: { fontSize: `${state.zoomLevel}em` },
       },
       [
         showTranslation && lyrics.translation
-          ? m(
-              ".row",
-              {
-                style: "margin: 0; max-width: 1200px; margin: 0 auto;",
-              },
-              [
+          ? m(".row.lyrics-row", [
+              m(".col.s12.m6.lyrics-col", [
+                m("h4.lyrics-heading", "Original"),
+                m(".lyrics-content", renderContent(lyrics.content, lyrics.format)),
+              ]),
+              m(".col.s12.m6.lyrics-col", [
                 m(
-                  ".col.s12.m6",
-                  {
-                    style: "line-height: 1.8;",
-                  },
-                  [
-                    m(
-                      "h4",
-                      {
-                        style:
-                          "color: #888; font-size: 0.9em; margin-bottom: 10px;",
-                      },
-                      "Original"
-                    ),
-                    m(
-                      ".lyrics-content",
-                      renderContent(lyrics.content, lyrics.format)
-                    ),
-                  ]
+                  "h4.lyrics-heading",
+                  lyrics.translationLanguage
+                    ? `Translation (${lyrics.translationLanguage})`
+                    : "Translation"
                 ),
                 m(
-                  ".col.s12.m6",
-                  {
-                    style: "line-height: 1.8;",
-                  },
-                  [
-                    m(
-                      "h4",
-                      {
-                        style:
-                          "color: #888; font-size: 0.9em; margin-bottom: 10px;",
-                      },
-                      lyrics.translationLanguage
-                        ? `Translation (${lyrics.translationLanguage})`
-                        : "Translation"
-                    ),
-                    m(
-                      ".lyrics-content",
-                      {
-                        style: "font-style: italic; color: #bbb;",
-                      },
-                      renderContent(lyrics.translation, lyrics.format)
-                    ),
-                  ]
+                  ".lyrics-content.lyrics-translation",
+                  renderContent(lyrics.translation, lyrics.format)
                 ),
-              ]
-            )
+              ]),
+            ])
           : m(
-              ".lyrics-content",
-              {
-                style: "max-width: 800px; margin: 0 auto; line-height: 1.8;",
-              },
+              ".lyrics-content.lyrics-single",
               renderContent(lyrics.content, lyrics.format)
             ),
       ]
     );
-  };
+  };;
 
   const renderScore = (score: Score) => {
     const url = URL.createObjectURL(score.blob);
@@ -222,22 +184,26 @@ export const PracticeView: m.FactoryComponent = () => {
       return m(
         ".score-container",
         {
-          style: `height: calc(100vh - 120px); overflow: auto; padding: 10px; background: #1a1a1a;`,
           ontouchstart: handleTouchStart,
           ontouchend: handleTouchEnd,
         },
         [
           m("iframe", {
             src: url,
-            style: `width: 100%; height: 100%; border: none; transform: scale(${state.zoomLevel}); transform-origin: top center;`,
+            style: {
+              width: "100%",
+              height: "100%",
+              border: "none",
+              transform: `scale(${state.zoomLevel})`,
+              transformOrigin: "top center",
+            },
           }),
         ]
       );
     } else if (score.type === "image") {
       return m(
-        ".score-container",
+        ".score-container-centered",
         {
-          style: `height: calc(100vh - 120px); overflow: auto; padding: 10px; text-align: center; background: #1a1a1a;`,
           ontouchstart: handleTouchStart,
           ontouchend: handleTouchEnd,
         },
@@ -245,7 +211,12 @@ export const PracticeView: m.FactoryComponent = () => {
           m("img", {
             src: url,
             alt: "Score",
-            style: `max-width: 100%; height: auto; transform: scale(${state.zoomLevel}); transform-origin: top center;`,
+            style: {
+              maxWidth: "100%",
+              height: "auto",
+              transform: `scale(${state.zoomLevel})`,
+              transformOrigin: "top center",
+            },
           }),
         ]
       );
@@ -254,7 +225,6 @@ export const PracticeView: m.FactoryComponent = () => {
       return m(
         ".score-container",
         {
-          style: `height: calc(100vh - 120px); overflow: auto; padding: 10px; background: #1a1a1a;`,
           ontouchstart: handleTouchStart,
           ontouchend: handleTouchEnd,
         },
@@ -266,7 +236,7 @@ export const PracticeView: m.FactoryComponent = () => {
         ]
       );
     }
-  };
+  };;
 
   return {
     async oninit() {
@@ -347,176 +317,109 @@ export const PracticeView: m.FactoryComponent = () => {
         return "Show lyrics";
       };
 
-      return m(
-        ".practice-view",
-        {
-          style:
-            "position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #1a1a1a; z-index: 1000; color: #ffffff;",
-        },
-        [
-          // Minimal header with controls
-          m(
-            ".practice-header",
-            {
-              style:
-                "height: 60px; background: #212121; color: white; display: flex; align-items: center; padding: 0 15px; justify-content: space-between; border-bottom: 1px solid #333;",
-            },
-            [
-              // Left side - Back button
-              m(".left-controls", [
-                m(FlatButton, {
-                  iconName: "arrow_back",
-                  className: "white-text",
-                  style: "margin-right: 20px;",
-                  onclick: () => m.route.set(`/song/${state.project!.id}`),
-                }),
-              ]),
+      return m(".practice-view", [
+        // Minimal header with controls
+        m(".practice-header", [
+          // Left side - Back button
+          m(".left-controls", [
+            m(FlatButton, {
+              iconName: "arrow_back",
+              className: "white-text back-button",
+              onclick: () => m.route.set(`/song/${state.project!.id}`),
+            }),
+          ]),
 
-              // Center - Audio controls
-              hasAudio &&
-                m(
-                  ".audio-controls",
-                  {
-                    style:
-                      "display: flex; flex-direction: row; align-items: center; gap: 8px; flex-shrink: 0;",
-                  },
-                  [
-                    m(FlatButton, {
-                      iconName: state.isPlaying ? "pause" : "play_arrow",
-                      className: "white-text",
-                      style: "min-width: 40px; padding: 0 8px;",
-                      onclick: togglePlay,
-                    }),
-                    m(FlatButton, {
-                      iconName: "stop",
-                      className: "white-text",
-                      style: "min-width: 40px; padding: 0 8px;",
-                      onclick: stop,
-                    }),
-                    m(
-                      "span",
-                      {
-                        style: "font-size: 13px; white-space: nowrap;",
-                      },
-                      `${formatTime(state.currentTime)} / ${formatTime(
-                        state.duration
-                      )}`
-                    ),
-                  ]
-                ),
-
-              // Right side - Zoom and toggle controls
+          // Center - Audio controls
+          hasAudio &&
+            m(".audio-controls", [
+              m(FlatButton, {
+                iconName: state.isPlaying ? "pause" : "play_arrow",
+                className: "white-text control-button",
+                onclick: togglePlay,
+              }),
+              m(FlatButton, {
+                iconName: "stop",
+                className: "white-text control-button",
+                onclick: stop,
+              }),
               m(
-                ".right-controls",
-                {
-                  style:
-                    "display: flex; flex-direction: row; align-items: center; gap: 5px;",
-                },
-                [
-                  m(FlatButton, {
-                    iconName: "zoom_out",
-                    className: "white-text",
-                    title: "Zoom out",
-                    onclick: zoomOut,
-                  }),
-                  m(
-                    "span",
-                    {
-                      style:
-                        "font-size: 13px; min-width: 45px; text-align: center;",
-                    },
-                    `${Math.round(state.zoomLevel * 100)}%`
-                  ),
-                  m(FlatButton, {
-                    iconName: "zoom_in",
-                    className: "white-text",
-                    title: "Zoom in",
-                    onclick: zoomIn,
-                  }),
-                  canToggleView &&
-                    m(FlatButton, {
-                      iconName: getViewModeIcon(),
-                      className: "white-text",
-                      title: getViewModeTitle(),
-                      onclick: cycleViewMode,
-                    }),
-                ]
+                "span.time-text",
+                `${formatTime(state.currentTime)} / ${formatTime(
+                  state.duration
+                )}`
               ),
-            ]
-          ),
+            ]),
 
-          // Content area
-          m(
-            ".practice-content",
-            {
-              style: "height: calc(100vh - 120px); overflow: hidden;",
-            },
-            [
-              state.viewMode === "lyrics" && hasLyrics
-                ? renderLyrics(state.project.lyrics!, false)
-                : state.viewMode === "lyrics-translation" && hasLyrics
-                ? renderLyrics(state.project.lyrics!, true)
-                : state.viewMode === "score" &&
-                  hasScores &&
-                  state.project.scores[state.currentScorePage]
-                ? renderScore(state.project.scores[state.currentScorePage])
-                : m(
-                    ".center-align",
-                    {
-                      style:
-                        "padding: 40px; background: #1a1a1a; height: calc(100vh - 120px);",
-                    },
-                    [
-                      m(
-                        "p",
-                        {
-                          style: "color: #888;",
-                        },
-                        "No lyrics or scores available for this song"
-                      ),
-                    ]
-                  ),
-            ]
-          ),
+          // Right side - Zoom and toggle controls
+          m(".right-controls", [
+            m(FlatButton, {
+              iconName: "zoom_out",
+              className: "white-text",
+              title: "Zoom out",
+              onclick: zoomOut,
+            }),
+            m("span.zoom-text", `${Math.round(state.zoomLevel * 100)}%`),
+            m(FlatButton, {
+              iconName: "zoom_in",
+              className: "white-text",
+              title: "Zoom in",
+              onclick: zoomIn,
+            }),
+            canToggleView &&
+              m(FlatButton, {
+                iconName: getViewModeIcon(),
+                className: "white-text",
+                title: getViewModeTitle(),
+                onclick: cycleViewMode,
+              }),
+          ]),
+        ]),
 
-          // Score navigation footer (only show when viewing scores)
-          state.viewMode === "score" &&
-            hasScores &&
-            state.project.scores.length > 1 &&
+        // Content area
+        m(".practice-content", [
+          state.viewMode === "lyrics" && hasLyrics
+            ? renderLyrics(state.project.lyrics!, false)
+            : state.viewMode === "lyrics-translation" && hasLyrics
+            ? renderLyrics(state.project.lyrics!, true)
+            : state.viewMode === "score" &&
+              hasScores &&
+              state.project.scores[state.currentScorePage]
+            ? renderScore(state.project.scores[state.currentScorePage])
+            : m(".center-align.practice-empty", [
+                m("p.practice-empty-text", "No lyrics or scores available for this song"),
+              ]),
+        ]),
+
+        // Score navigation footer (only show when viewing scores)
+        state.viewMode === "score" &&
+          hasScores &&
+          state.project.scores.length > 1 &&
+          m(".practice-footer", [
             m(
-              ".practice-footer",
+              "button.btn.waves-effect",
               {
-                style:
-                  "height: 60px; background: #212121; display: flex; align-items: center; justify-content: center; gap: 20px; border-top: 1px solid #333; color: white;",
+                onclick: prevScorePage,
+                disabled: state.currentScorePage === 0,
               },
-              [
-                m(
-                  "button.btn.waves-effect",
-                  {
-                    onclick: prevScorePage,
-                    disabled: state.currentScorePage === 0,
-                  },
-                  [m("i.material-icons", "chevron_left")]
-                ),
-                m(
-                  "span",
-                  `Page ${state.currentScorePage + 1} of ${
-                    state.project.scores.length
-                  }`
-                ),
-                m(
-                  "button.btn.waves-effect",
-                  {
-                    onclick: nextScorePage,
-                    disabled:
-                      state.currentScorePage >= state.project.scores.length - 1,
-                  },
-                  [m("i.material-icons", "chevron_right")]
-                ),
-              ]
+              [m("i.material-icons", "chevron_left")]
             ),
-        ]
-      );
+            m(
+              "span",
+              `Page ${state.currentScorePage + 1} of ${
+                state.project.scores.length
+              }`
+            ),
+            m(
+              "button.btn.waves-effect",
+              {
+                onclick: nextScorePage,
+                disabled:
+                  state.currentScorePage >= state.project.scores.length - 1,
+              },
+              [m("i.material-icons", "chevron_right")]
+            ),
+          ]),
+      ]);
     },
   };
 };

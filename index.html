@@ -85,6 +85,133 @@
     .score-selector {
       margin-bottom: 20px;
     }
+    /* Logo styling */
+    .logo-small {
+      max-width: 100px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    .logo-large {
+      max-width: 100%;
+      height: auto;
+      margin: 40px 0;
+    }
+    /* Practice view */
+    .practice-view {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #1a1a1a;
+      z-index: 1000;
+      color: #ffffff;
+    }
+    .practice-header {
+      height: 60px;
+      background: #212121;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      justify-content: space-between;
+      border-bottom: 1px solid #333;
+    }
+    .practice-header .audio-controls {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .practice-header .right-controls {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 5px;
+    }
+    .practice-header .back-button {
+      margin-right: 20px;
+    }
+    .practice-header .control-button {
+      min-width: 40px;
+      padding: 0 8px;
+    }
+    .practice-header .time-text {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .practice-header .zoom-text {
+      font-size: 13px;
+      min-width: 45px;
+      text-align: center;
+    }
+    .practice-content {
+      height: calc(100vh - 120px);
+      overflow: hidden;
+    }
+    .practice-footer {
+      height: 60px;
+      background: #212121;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      border-top: 1px solid #333;
+      color: white;
+    }
+    .practice-empty {
+      padding: 40px;
+      background: #1a1a1a;
+      height: calc(100vh - 120px);
+    }
+    .practice-empty-text {
+      color: #888;
+    }
+    /* Lyrics styling */
+    .lyrics-container {
+      padding: 20px;
+      overflow-y: auto;
+      height: calc(100vh - 120px);
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+    .lyrics-row {
+      margin: 0;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .lyrics-col {
+      line-height: 1.8;
+    }
+    .lyrics-heading {
+      color: #888;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+    .lyrics-translation {
+      font-style: italic;
+      color: #bbb;
+    }
+    .lyrics-single {
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    /* Score styling */
+    .score-container {
+      height: calc(100vh - 120px);
+      overflow: auto;
+      padding: 10px;
+      background: #1a1a1a;
+    }
+    .score-container-centered {
+      height: calc(100vh - 120px);
+      overflow: auto;
+      padding: 10px;
+      text-align: center;
+      background: #1a1a1a;
+    }
   </style>
 </head>
 <body>
