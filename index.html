@@ -150,6 +150,21 @@
       height: calc(100vh - 120px);
       overflow: hidden;
     }
+    .practice-view:has(.bookmarks-container) .practice-content {
+      height: calc(100vh - 170px);
+    }
+    .practice-view:has(.bookmarks-container) .practice-empty {
+      height: calc(100vh - 170px);
+    }
+    .practice-view:has(.bookmarks-container) .lyrics-container {
+      height: calc(100vh - 170px);
+    }
+    .practice-view:has(.bookmarks-container) .score-container {
+      height: calc(100vh - 170px);
+    }
+    .practice-view:has(.bookmarks-container) .score-container-centered {
+      height: calc(100vh - 170px);
+    }
     .practice-footer {
       height: 60px;
       background: #212121;
@@ -211,6 +226,64 @@
       padding: 10px;
       text-align: center;
       background: #1a1a1a;
+    }
+    /* Bookmarks styling */
+    .bookmarks-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 15px;
+      background: #2a2a2a;
+      border-bottom: 1px solid #333;
+      min-height: 50px;
+    }
+    .bookmark-item {
+      display: flex;
+      align-items: center;
+      background: #3a3a3a;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #4a4a4a;
+      transition: all 0.2s ease;
+    }
+    .bookmark-item:hover {
+      border-color: #1976d2;
+      box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+    }
+    .bookmark-timestamp {
+      padding: 6px 12px;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      background: #3a3a3a;
+      transition: background 0.2s ease;
+    }
+    .bookmark-timestamp:hover {
+      background: #4a4a4a;
+    }
+    .bookmark-delete {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+      cursor: pointer;
+      background: #3a3a3a;
+      border-left: 1px solid #4a4a4a;
+      transition: background 0.2s ease;
+    }
+    .bookmark-delete:hover {
+      background: #d32f2f;
+    }
+    .bookmark-delete i {
+      font-size: 16px;
+      color: #bbb;
+      transition: color 0.2s ease;
+    }
+    .bookmark-delete:hover i {
+      color: #ffffff;
     }
   </style>
 </head>

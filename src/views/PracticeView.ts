@@ -1,8 +1,8 @@
 import m from "mithril";
 import { render } from "slimdown-js";
 import { FlatButton } from "mithril-materialized";
-import { Project, Lyrics, Score } from "../models/types";
-import { getProject } from "../services/db";
+import { Project, Lyrics, Score, Bookmark } from "../models/types";
+import { getProject, saveProject } from "../services/db";
 
 type ViewMode = "lyrics" | "lyrics-translation" | "score";
 
@@ -34,8 +34,13 @@ export const PracticeView: m.FactoryComponent = () => {
   };
 
   const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
+
+    if (hours > 0) {
+      return `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
@@ -98,6 +103,44 @@ export const PracticeView: m.FactoryComponent = () => {
       } else {
         // Swipe right - previous page
         prevScorePage();
+      }
+    }
+  };
+
+  const addBookmark = async () => {
+    if (!state.project || !state.audio || !state.isPlaying) return;
+
+    const bookmark: Bookmark = {
+      id: `bookmark-${Date.now()}`,
+      timestamp: state.currentTime,
+    };
+
+    const bookmarks = state.project.bookmarks || [];
+    state.project.bookmarks = [...bookmarks, bookmark].sort(
+      (a, b) => a.timestamp - b.timestamp
+    );
+
+    await saveProject(state.project);
+    m.redraw();
+  };
+
+  const deleteBookmark = async (bookmarkId: string) => {
+    if (!state.project) return;
+
+    state.project.bookmarks = (state.project.bookmarks || []).filter(
+      (b) => b.id !== bookmarkId
+    );
+
+    await saveProject(state.project);
+    m.redraw();
+  };
+
+  const jumpToBookmark = (timestamp: number) => {
+    if (state.audio) {
+      state.audio.currentTime = timestamp;
+      if (!state.isPlaying) {
+        state.audio.play();
+        state.isPlaying = true;
       }
     }
   };
@@ -342,6 +385,13 @@ export const PracticeView: m.FactoryComponent = () => {
                 className: "white-text control-button",
                 onclick: stop,
               }),
+              m(FlatButton, {
+                iconName: "bookmark_add",
+                className: "white-text control-button",
+                title: "Add bookmark",
+                disabled: !state.isPlaying,
+                onclick: addBookmark,
+              }),
               m(
                 "span.time-text",
                 `${formatTime(state.currentTime)} / ${formatTime(
@@ -374,6 +424,33 @@ export const PracticeView: m.FactoryComponent = () => {
               }),
           ]),
         ]),
+
+        // Bookmarks section
+        hasAudio &&
+          state.project.bookmarks &&
+          state.project.bookmarks.length > 0 &&
+          m(".bookmarks-container", [
+            state.project.bookmarks.map((bookmark) =>
+              m(".bookmark-item", { key: bookmark.id }, [
+                m(
+                  ".bookmark-timestamp",
+                  {
+                    onclick: () => jumpToBookmark(bookmark.timestamp),
+                    title: "Jump to this position",
+                  },
+                  formatTime(bookmark.timestamp)
+                ),
+                m(
+                  ".bookmark-delete",
+                  {
+                    onclick: () => deleteBookmark(bookmark.id),
+                    title: "Delete bookmark",
+                  },
+                  m("i.material-icons", "close")
+                ),
+              ])
+            ),
+          ]),
 
         // Content area
         m(".practice-content", [

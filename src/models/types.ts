@@ -27,6 +27,11 @@ export interface CuePoint {
   label?: string;
 }
 
+export interface Bookmark {
+  id: string;
+  timestamp: number; // in seconds
+}
+
 export interface Score {
   id: string;
   type: ScoreType;
@@ -56,6 +61,7 @@ export interface Project {
   lyrics?: Lyrics;
   scores: Score[];
   cuePoints: CuePoint[];
+  bookmarks?: Bookmark[];
 }
 
 export interface PlaylistItem {
