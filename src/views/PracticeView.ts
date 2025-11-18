@@ -152,6 +152,21 @@ export const PracticeView: m.FactoryComponent = () => {
     }
   };
 
+  // Global touch handling for swipe-from-left-edge navigation
+  const handleGlobalTouchStart = (e: TouchEvent) => {
+    state.touchStartX = e.touches[0].clientX;
+  };
+
+  const handleGlobalTouchEnd = (e: TouchEvent) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - state.touchStartX;
+
+    // Swipe from left edge (start within 30px of left edge) and swipe right > 80px
+    if (state.touchStartX < 30 && diff > 80) {
+      m.route.set(`/song/${state.project!.id}`);
+    }
+  };
+
   const addBookmark = async () => {
     if (!state.project || !state.audio || !state.isPlaying) return;
 
@@ -535,7 +550,10 @@ export const PracticeView: m.FactoryComponent = () => {
         return "Show lyrics";
       };
 
-      return m(".practice-view", [
+      return m(".practice-view", {
+        ontouchstart: handleGlobalTouchStart,
+        ontouchend: handleGlobalTouchEnd,
+      }, [
         // Minimal header with controls
         m(".practice-header", [
           // Left side - Back button
@@ -609,6 +627,27 @@ export const PracticeView: m.FactoryComponent = () => {
               }),
           ]),
         ]),
+
+        // Mobile seek bar row (shown only on small screens via CSS)
+        hasAudio &&
+          m(".mobile-seek-bar-row", [
+            m("input.mobile-seek-bar", {
+              type: "range",
+              min: 0,
+              max: state.duration || 100,
+              step: 0.1,
+              value: state.currentTime,
+              oninput: (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                const time = parseFloat(target.value);
+                if (state.audio) {
+                  state.audio.currentTime = time;
+                  state.currentTime = time;
+                }
+              },
+              style: `--progress: ${state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0}%`,
+            }),
+          ]),
 
         // Bookmarks section
         hasAudio &&
