@@ -1,5 +1,12 @@
 import m from "mithril";
-import { TextArea } from "mithril-materialized";
+import {
+  Button,
+  Chips,
+  NumberInput,
+  Select,
+  TextArea,
+  TextInput,
+} from "mithril-materialized";
 import { Project, Genre, VoiceType, Score } from "@/models/types";
 import { saveProject, getProject, generateId } from "@/services/db";
 
@@ -149,131 +156,58 @@ export const ProjectEditor: m.FactoryComponent = () => {
         m(".row", [
           m(".col.s12", [
             m(".card", [
-              m(".card-content", [
-                m("span.card-title", "Basic Information"),
+              m(".card-content.row", [
+                m("span.card-title.col.s12", "Basic Information"),
 
                 // Title
-                m(".input-field", [
-                  m("input#title[type=text]", {
-                    value: project.metadata.title,
-                    oninput: (e: Event) => {
-                      project.metadata.title = (
-                        e.target as HTMLInputElement
-                      ).value;
-                    },
-                    required: true,
-                  }),
-                  m(
-                    "label[for=title]",
-                    { class: project.metadata.title ? "active" : "" },
-                    "Title *"
-                  ),
-                ]),
+                m(TextInput, {
+                  label: "Title",
+                  value: project.metadata.title,
+                  oninput: (title) => (project.metadata.title = title),
+                  isMandatory: true,
+                }),
 
                 // Composer
-                m(".input-field", [
-                  m("input#composer[type=text]", {
-                    value: project.metadata.composer || "",
-                    oninput: (e: Event) => {
-                      project.metadata.composer = (
-                        e.target as HTMLInputElement
-                      ).value;
-                    },
-                  }),
-                  m(
-                    "label[for=composer]",
-                    { class: project.metadata.composer ? "active" : "" },
-                    "Composer"
-                  ),
-                ]),
+                m(TextInput, {
+                  label: "Composer",
+                  value: project.metadata.composer,
+                  oninput: (composer) => (project.metadata.composer = composer),
+                }),
 
                 // Genre
-                m(".input-field", [
-                  m(
-                    "select.browser-default",
-                    {
-                      value: project.metadata.genre || "",
-                      onchange: (e: Event) => {
-                        const value = (e.target as HTMLSelectElement).value;
-                        project.metadata.genre = value
-                          ? (value as Genre)
-                          : undefined;
-                      },
-                    },
-                    [
-                      m("option", { value: "" }, "Select Genre"),
-                      ...genres.map((genre) =>
-                        m("option", { value: genre }, genre)
-                      ),
-                    ]
-                  ),
-                ]),
+                m(Select<Genre>, {
+                  label: "Genre",
+                  checkedId: project.metadata.genre,
+                  options: genres.map((genre) => ({ id: genre, label: genre })),
+                  onchange: (s) => (project.metadata.genre = s[0]),
+                }),
 
                 // Voice Type
-                m(".input-field", [
-                  m(
-                    "select.browser-default",
-                    {
-                      value: project.metadata.voiceType || "",
-                      onchange: (e: Event) => {
-                        const value = (e.target as HTMLSelectElement).value;
-                        project.metadata.voiceType = value
-                          ? (value as VoiceType)
-                          : undefined;
-                      },
-                    },
-                    [
-                      m("option", { value: "" }, "Select Voice Type"),
-                      ...voiceTypes.map((type) =>
-                        m("option", { value: type }, type)
-                      ),
-                    ]
-                  ),
-                ]),
+                m(Select<VoiceType>, {
+                  label: "Voice Type",
+                  checkedId: project.metadata.voiceType,
+                  options: voiceTypes.map((genre) => ({
+                    id: genre,
+                    label: genre,
+                  })),
+                  onchange: (s) => (project.metadata.voiceType = s[0]),
+                }),
 
                 // Year
-                m(".input-field", [
-                  m("input#year[type=number]", {
-                    value: project.metadata.year || "",
-                    oninput: (e: Event) => {
-                      const value = (e.target as HTMLInputElement).value;
-                      project.metadata.year = value
-                        ? parseInt(value)
-                        : undefined;
-                    },
-                  }),
-                  m(
-                    "label[for=year]",
-                    { class: project.metadata.year ? "active" : "" },
-                    "Year"
-                  ),
-                ]),
+                m(NumberInput, {
+                  label: "Year",
+                  value: project.metadata.year,
+                  oninput: (year) => (project.metadata.year = year),
+                }),
 
                 // Tags
-                m(".input-field", [
-                  m("input#tags[type=text]", {
-                    onkeydown: handleTagInput,
-                    placeholder: "Press Enter to add tag",
-                  }),
-                  m("label[for=tags]", "Tags"),
-                ]),
-                project.metadata.tags &&
-                  project.metadata.tags.length > 0 &&
-                  m(
-                    ".chips",
-                    project.metadata.tags.map((tag, idx) =>
-                      m(".chip", { key: idx }, [
-                        tag,
-                        m(
-                          "i.material-icons.close",
-                          {
-                            onclick: () => removeTag(idx),
-                          },
-                          "close"
-                        ),
-                      ])
-                    )
-                  ),
+                m(Chips, {
+                  label: "Tags",
+                  placeholder: "Add tag",
+                  data: project.metadata.tags
+                    ? project.metadata.tags.map((tag) => ({ tag }))
+                    : undefined,
+                }),
 
                 // Description
                 m(TextArea, {
@@ -293,7 +227,7 @@ export const ProjectEditor: m.FactoryComponent = () => {
         m(".row", [
           m(".col.s12", [
             m(".card", [
-              m(".card-content", [
+              m(".card-content.row", [
                 m("span.card-title", "Audio Track"),
                 m(".file-field.input-field", [
                   m(".btn", [
@@ -320,7 +254,7 @@ export const ProjectEditor: m.FactoryComponent = () => {
         m(".row", [
           m(".col.s12", [
             m(".card", [
-              m(".card-content", [
+              m(".card-content.row", [
                 m("span.card-title", "Scores"),
                 m(".file-field.input-field", [
                   m(".btn", [
@@ -425,25 +359,21 @@ export const ProjectEditor: m.FactoryComponent = () => {
         // Actions
         m(".row", [
           m(".col.s12", [
-            m(
-              "button.btn.waves-effect.waves-light",
-              {
-                onclick: handleSave,
-                disabled: state.loading || !project.metadata.title,
-              },
-              [
-                m("i.material-icons.left", "save"),
-                state.loading ? "Saving..." : "Save Song",
-              ]
-            ),
+            m(Button, {
+              label: state.loading ? "Saving..." : "Save Song",
+              iconName: "save",
+              disabled: state.loading || !project.metadata.title,
+              onclick: handleSave,
+            }),
             " ",
-            m(
-              "a.btn.grey.waves-effect.waves-light",
-              {
-                href: state.isNew ? "#!/library" : `#!/song/${project.id}`,
-              },
-              "Cancel"
-            ),
+            m(Button, {
+              className: "grey",
+              label: "Cancel",
+              iconName: "cancel",
+              disabled: state.loading || !project.metadata.title,
+              onclick: () =>
+                m.route.set(state.isNew ? "/library" : `/song/${project.id}`),
+            }),
           ]),
         ]),
       ]);
