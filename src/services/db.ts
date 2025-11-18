@@ -1,6 +1,11 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import { Project, Playlist } from '@/models/types';
 
+export interface AppSettings {
+  key: string;
+  value: string | number | boolean;
+}
+
 interface PocketAriaDB extends DBSchema {
   projects: {
     key: string;
@@ -21,10 +26,14 @@ interface PocketAriaDB extends DBSchema {
       'by-createdAt': number;
     };
   };
+  settings: {
+    key: string;
+    value: AppSettings;
+  };
 }
 
 const DB_NAME = 'pocket-aria-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance: IDBPDatabase<PocketAriaDB> | null = null;
 
@@ -34,7 +43,9 @@ export async function initDB(): Promise<IDBPDatabase<PocketAriaDB>> {
   }
 
   dbInstance = await openDB<PocketAriaDB>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
+    upgrade(db, oldVersion, newVersion) {
+      console.log(`Upgrading database from version ${oldVersion} to ${newVersion}`);
+
       // Projects store
       if (!db.objectStoreNames.contains('projects')) {
         const projectStore = db.createObjectStore('projects', { keyPath: 'id' });
@@ -51,6 +62,19 @@ export async function initDB(): Promise<IDBPDatabase<PocketAriaDB>> {
         playlistStore.createIndex('by-name', 'name');
         playlistStore.createIndex('by-createdAt', 'createdAt');
       }
+
+      // Settings store
+      if (!db.objectStoreNames.contains('settings')) {
+        db.createObjectStore('settings', { keyPath: 'key' });
+      }
+    },
+    blocked() {
+      console.warn('Database upgrade blocked - please close other tabs using this app');
+    },
+    blocking() {
+      console.warn('Database blocking another connection - closing this connection');
+      dbInstance?.close();
+      dbInstance = null;
     },
   });
 
@@ -123,6 +147,23 @@ export async function getAllPlaylists(): Promise<Playlist[]> {
 export async function deletePlaylist(id: string): Promise<void> {
   const db = await initDB();
   await db.delete('playlists', id);
+}
+
+// Settings operations
+export async function saveSetting(key: string, value: string | number | boolean): Promise<void> {
+  const db = await initDB();
+  await db.put('settings', { key, value });
+}
+
+export async function getSetting<T extends string | number | boolean>(key: string): Promise<T | undefined> {
+  const db = await initDB();
+  const setting = await db.get('settings', key);
+  return setting?.value as T | undefined;
+}
+
+export async function deleteSetting(key: string): Promise<void> {
+  const db = await initDB();
+  await db.delete('settings', key);
 }
 
 // Utility functions

@@ -40,7 +40,7 @@ main {
   margin: 10px 0;
 }
 
-.seek-bar input[type=range] {
+.seek-bar input[type="range"] {
   width: 100%;
 }
 
@@ -183,23 +183,28 @@ main {
   height: calc(100vh - 140px);
 }
 
-.practice-view:has(.seek-bar-container):has(.bookmarks-container) .practice-content {
+.practice-view:has(.seek-bar-container):has(.bookmarks-container)
+  .practice-content {
   height: calc(100vh - 190px);
 }
 
-.practice-view:has(.seek-bar-container):has(.bookmarks-container) .practice-empty {
+.practice-view:has(.seek-bar-container):has(.bookmarks-container)
+  .practice-empty {
   height: calc(100vh - 190px);
 }
 
-.practice-view:has(.seek-bar-container):has(.bookmarks-container) .lyrics-container {
+.practice-view:has(.seek-bar-container):has(.bookmarks-container)
+  .lyrics-container {
   height: calc(100vh - 190px);
 }
 
-.practice-view:has(.seek-bar-container):has(.bookmarks-container) .score-container {
+.practice-view:has(.seek-bar-container):has(.bookmarks-container)
+  .score-container {
   height: calc(100vh - 190px);
 }
 
-.practice-view:has(.seek-bar-container):has(.bookmarks-container) .score-container-centered {
+.practice-view:has(.seek-bar-container):has(.bookmarks-container)
+  .score-container-centered {
   height: calc(100vh - 190px);
 }
 
@@ -367,11 +372,13 @@ main {
 .seek-bar::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
-  background: linear-gradient(to right,
-      #1976d2 0%,
-      #1976d2 var(--progress, 0%),
-      #4a4a4a var(--progress, 0%),
-      #4a4a4a 100%);
+  background: linear-gradient(
+    to right,
+    #1976d2 0%,
+    #1976d2 var(--progress, 0%),
+    #4a4a4a var(--progress, 0%),
+    #4a4a4a 100%
+  );
   border-radius: 2px;
 }
 
@@ -482,11 +489,13 @@ main {
 .audio-control-seekbar::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
-  background: linear-gradient(to right,
-      #1976d2 0%,
-      #1976d2 var(--progress, 0%),
-      #4a4a4a var(--progress, 0%),
-      #4a4a4a 100%);
+  background: linear-gradient(
+    to right,
+    #1976d2 0%,
+    #1976d2 var(--progress, 0%),
+    #4a4a4a var(--progress, 0%),
+    #4a4a4a 100%
+  );
   border-radius: 2px;
 }
 
@@ -745,6 +754,7 @@ main {
 
 .row.lrc-editor-line {
   margin-bottom: -8px;
+  padding: 0;
 }
 
 .lrc-editor-line {
@@ -769,7 +779,7 @@ main {
 .lrc-editor-line.empty-line {
   cursor: default;
   opacity: 0.5;
-  padding: 5px 10px;
+  padding: 15px 0;
 }
 
 .lrc-editor-line.empty-line:hover {

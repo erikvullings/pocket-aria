@@ -1,7 +1,7 @@
 import m from "mithril";
 import { FlatButton } from "mithril-materialized";
 import { Project, LrcTimestamp } from "../models/types";
-import { getProject, saveProject } from "../services/db";
+import { getProject, saveProject, getSetting, saveSetting } from "../services/db";
 import { formatLrcTimestamp } from "../utils/lrc";
 import {
   AudioControl,
@@ -111,6 +111,8 @@ export const LrcEditorView: m.FactoryComponent = () => {
         await (state.audio as any).setSinkId(deviceId);
         state.selectedAudioDevice = deviceId;
         state.showDeviceSelector = false;
+        // Save to IndexedDB
+        await saveSetting("audioOutputDevice", deviceId);
         m.redraw();
       } catch (error) {
         console.error("Error changing audio device:", error);
@@ -314,6 +316,20 @@ export const LrcEditorView: m.FactoryComponent = () => {
             const url = URL.createObjectURL(state.project.audioTrack.blob);
             audio.src = url;
             state.audio = audio;
+
+            // Load saved audio output device
+            const savedDevice = await getSetting<string>("audioOutputDevice");
+            if (savedDevice) {
+              state.selectedAudioDevice = savedDevice;
+              const audioElement = audio as any;
+              if (typeof audioElement.setSinkId === "function") {
+                try {
+                  await audioElement.setSinkId(savedDevice);
+                } catch (error) {
+                  console.warn("Could not restore audio device:", error);
+                }
+              }
+            }
 
             audio.addEventListener("loadedmetadata", () => {
               state.duration = audio.duration;
