@@ -17,6 +17,9 @@ interface PracticeViewState {
   currentScorePage: number;
   viewMode: ViewMode;
   touchStartX: number;
+  audioDevices: MediaDeviceInfo[];
+  selectedAudioDevice: string;
+  showDeviceSelector: boolean;
 }
 
 export const PracticeView: m.FactoryComponent = () => {
@@ -31,6 +34,9 @@ export const PracticeView: m.FactoryComponent = () => {
     currentScorePage: 0,
     viewMode: "lyrics",
     touchStartX: 0,
+    audioDevices: [],
+    selectedAudioDevice: "default",
+    showDeviceSelector: false,
   };
 
   const formatTime = (seconds: number): string => {
@@ -142,6 +148,47 @@ export const PracticeView: m.FactoryComponent = () => {
         state.audio.play();
         state.isPlaying = true;
       }
+    }
+  };
+
+  const loadAudioDevices = async () => {
+    try {
+      // Request permission to enumerate devices
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      state.audioDevices = devices.filter(
+        (device) => device.kind === "audiooutput"
+      );
+      m.redraw();
+    } catch (error) {
+      console.error("Error enumerating audio devices:", error);
+    }
+  };
+
+  const changeAudioDevice = async (deviceId: string) => {
+    if (!state.audio) return;
+
+    try {
+      // Cast to any to access setSinkId which may not be in all TypeScript definitions
+      const audioElement = state.audio as any;
+      if (typeof audioElement.setSinkId === "function") {
+        await audioElement.setSinkId(deviceId);
+        state.selectedAudioDevice = deviceId;
+        state.showDeviceSelector = false;
+        m.redraw();
+      } else {
+        console.warn("setSinkId is not supported in this browser");
+      }
+    } catch (error) {
+      console.error("Error changing audio output device:", error);
+    }
+  };
+
+  const toggleDeviceSelector = () => {
+    state.showDeviceSelector = !state.showDeviceSelector;
+    if (state.showDeviceSelector && state.audioDevices.length === 0) {
+      loadAudioDevices();
     }
   };
 
@@ -321,12 +368,30 @@ export const PracticeView: m.FactoryComponent = () => {
 
         m.redraw();
       }
+
+      // Add click handler to close device selector when clicking outside
+      const handleClickOutside = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (state.showDeviceSelector && !target.closest(".audio-device-selector-wrapper")) {
+          state.showDeviceSelector = false;
+          m.redraw();
+        }
+      };
+      document.addEventListener("click", handleClickOutside);
+
+      // Store the handler for cleanup
+      (this as any).handleClickOutside = handleClickOutside;
     },
 
     onremove() {
       if (state.audio) {
         state.audio.pause();
         URL.revokeObjectURL(state.audio.src);
+      }
+
+      // Remove click handler
+      if ((this as any).handleClickOutside) {
+        document.removeEventListener("click", (this as any).handleClickOutside);
       }
     },
 
@@ -402,6 +467,40 @@ export const PracticeView: m.FactoryComponent = () => {
 
           // Right side - Zoom and toggle controls
           m(".right-controls", [
+            hasAudio &&
+              m(".audio-device-selector-wrapper", [
+                m(FlatButton, {
+                  iconName: "volume_up",
+                  className: "white-text",
+                  title: "Select audio output device",
+                  onclick: toggleDeviceSelector,
+                }),
+                state.showDeviceSelector &&
+                  m(".audio-device-dropdown", [
+                    m("div.audio-device-header", "Audio Output"),
+                    state.audioDevices.length === 0
+                      ? m("div.audio-device-loading", "Loading devices...")
+                      : state.audioDevices.map((device) =>
+                          m(
+                            "div.audio-device-item",
+                            {
+                              key: device.deviceId,
+                              class:
+                                state.selectedAudioDevice === device.deviceId
+                                  ? "selected"
+                                  : "",
+                              onclick: () => changeAudioDevice(device.deviceId),
+                            },
+                            [
+                              m("i.material-icons", "volume_up"),
+                              m("span", device.label || "Default"),
+                              state.selectedAudioDevice === device.deviceId &&
+                                m("i.material-icons.check-icon", "check"),
+                            ]
+                          )
+                        ),
+                  ]),
+              ]),
             m(FlatButton, {
               iconName: "zoom_out",
               className: "white-text",
