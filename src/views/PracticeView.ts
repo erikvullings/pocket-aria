@@ -3,6 +3,8 @@ import { render } from "slimdown-js";
 import { FlatButton } from "mithril-materialized";
 import { Project, Lyrics, Score, Bookmark } from "../models/types";
 import { getProject, saveProject, getSetting, saveSetting } from "../services/db";
+import { parseLrcContent, getActiveLrcLine } from "../utils/lrc";
+import { AudioControl } from "../components/AudioControl";
 
 type ViewMode = "lyrics" | "lyrics-translation" | "score";
 
@@ -20,7 +22,10 @@ interface PracticeViewState {
   audioDevices: MediaDeviceInfo[];
   selectedAudioDevice: string;
   showDeviceSelector: boolean;
+  offset: number;
 }
+
+const OFFSET_OPTIONS = [0, -1, -2, -3, -4, -5];
 
 export const PracticeView: m.FactoryComponent = () => {
   let state: PracticeViewState = {
@@ -37,6 +42,38 @@ export const PracticeView: m.FactoryComponent = () => {
     audioDevices: [],
     selectedAudioDevice: "default",
     showDeviceSelector: false,
+    offset: 0,
+  };
+
+  // Load offset from localStorage
+  const loadOffset = () => {
+    const stored = localStorage.getItem("practice-view-offset");
+    if (stored !== null) {
+      state.offset = parseInt(stored, 10);
+    }
+  };
+
+  // Cycle through offset options
+  const cycleOffset = () => {
+    const currentIndex = OFFSET_OPTIONS.indexOf(state.offset);
+    const nextIndex = (currentIndex + 1) % OFFSET_OPTIONS.length;
+    state.offset = OFFSET_OPTIONS[nextIndex];
+    localStorage.setItem("practice-view-offset", state.offset.toString());
+    m.redraw();
+  };
+
+  // Jump to line timestamp with offset
+  const jumpToLineTimestamp = (timestamp: number) => {
+    if (state.audio) {
+      const targetTime = Math.max(0, timestamp + state.offset);
+      state.audio.currentTime = targetTime;
+      state.currentTime = targetTime;
+      if (!state.isPlaying) {
+        state.audio.play();
+        state.isPlaying = true;
+      }
+      m.redraw();
+    }
   };
 
   const formatTime = (seconds: number): string => {
@@ -69,15 +106,6 @@ export const PracticeView: m.FactoryComponent = () => {
       state.audio.currentTime = 0;
       state.isPlaying = false;
       state.currentTime = 0;
-    }
-  };
-
-  const handleSeek = (e: Event) => {
-    if (state.audio) {
-      const target = e.target as HTMLInputElement;
-      const time = parseFloat(target.value);
-      state.audio.currentTime = time;
-      state.currentTime = time;
     }
   };
 
@@ -232,7 +260,48 @@ export const PracticeView: m.FactoryComponent = () => {
   };
 
   const renderLyrics = (lyrics: Lyrics, showTranslation: boolean = false) => {
+    // Parse LRC timestamps if available
+    const hasTimestamps = lyrics.lrcTimestamps && lyrics.lrcTimestamps.length > 0;
+    const { plainText: originalPlain, timestamps: parsedTimestamps } = parseLrcContent(lyrics.content);
+    const timestamps = hasTimestamps ? lyrics.lrcTimestamps! : parsedTimestamps;
+
+    // Get active line index based on current time
+    const activeLineIndex = timestamps.length > 0 ? getActiveLrcLine(state.currentTime, timestamps) : -1;
+
+    // Parse translation if available
+    const translationPlain = lyrics.translation ? parseLrcContent(lyrics.translation).plainText : "";
+
     const renderContent = (content: string, format: string) => {
+      // For text format with timestamps, render line by line with highlighting
+      if (format === "text" && timestamps.length > 0) {
+        const lines = content.split("\n");
+        // Create a map for quick timestamp lookup
+        const timestampMap = new Map<number, number>();
+        timestamps.forEach((ts) => timestampMap.set(ts.lineIndex, ts.timestamp));
+
+        return lines.map((line, idx) => {
+          const isActive = idx === activeLineIndex;
+          const lineTimestamp = timestampMap.get(idx);
+          const hasTimestamp = lineTimestamp !== undefined;
+
+          return m(
+            "div.lyrics-line",
+            {
+              key: idx,
+              class: [
+                isActive ? "active-line" : "",
+                hasTimestamp ? "clickable" : "",
+              ].filter(Boolean).join(" "),
+              onclick: hasTimestamp
+                ? () => jumpToLineTimestamp(lineTimestamp)
+                : undefined,
+              style: hasTimestamp ? { cursor: "pointer" } : undefined,
+            },
+            line || "\u00A0"
+          );
+        });
+      }
+
       switch (format) {
         case "html":
           return m.trust(content);
@@ -249,6 +318,10 @@ export const PracticeView: m.FactoryComponent = () => {
       }
     };
 
+    // Use plain text (without timestamps) for display
+    const displayContent = timestamps.length > 0 ? originalPlain : lyrics.content;
+    const displayTranslation = timestamps.length > 0 ? translationPlain : (lyrics.translation || "");
+
     return m(
       ".lyrics-container",
       {
@@ -261,7 +334,7 @@ export const PracticeView: m.FactoryComponent = () => {
                 m("h4.lyrics-heading", "Original"),
                 m(
                   ".lyrics-content",
-                  renderContent(lyrics.content, lyrics.format)
+                  renderContent(displayContent, lyrics.format)
                 ),
               ]),
               m(".col.s12.m6.lyrics-col", [
@@ -273,13 +346,13 @@ export const PracticeView: m.FactoryComponent = () => {
                 ),
                 m(
                   ".lyrics-content.lyrics-translation",
-                  renderContent(lyrics.translation, lyrics.format)
+                  renderContent(displayTranslation, lyrics.format)
                 ),
               ]),
             ])
           : m(
               ".lyrics-content.lyrics-single",
-              renderContent(lyrics.content, lyrics.format)
+              renderContent(displayContent, lyrics.format)
             ),
       ]
     );
@@ -348,6 +421,8 @@ export const PracticeView: m.FactoryComponent = () => {
 
   return {
     async oninit() {
+      loadOffset();
+
       const id = m.route.param("id");
       if (id) {
         const project = await getProject(id);
@@ -472,70 +547,46 @@ export const PracticeView: m.FactoryComponent = () => {
             }),
           ]),
 
-          // Center - Audio controls
+          // Center - Audio controls using AudioControl component
           hasAudio &&
-            m(".audio-controls", [
-              m(FlatButton, {
-                iconName: state.isPlaying ? "pause" : "play_arrow",
-                className: "white-text control-button",
-                onclick: togglePlay,
-              }),
-              m(FlatButton, {
-                iconName: "stop",
-                className: "white-text control-button",
-                onclick: stop,
-              }),
-              m(FlatButton, {
-                iconName: "bookmark_add",
-                className: "white-text control-button",
-                title: "Add bookmark",
-                disabled: !state.isPlaying,
-                onclick: addBookmark,
-              }),
-              m(
-                "span.time-text",
-                `${formatTime(state.currentTime)} / ${formatTime(
-                  state.duration
-                )}`
-              ),
-            ]),
+            m(AudioControl, {
+              state: {
+                isPlaying: state.isPlaying,
+                currentTime: state.currentTime,
+                duration: state.duration,
+                audio: state.audio,
+                audioDevices: state.audioDevices,
+                selectedAudioDevice: state.selectedAudioDevice,
+                showDeviceSelector: state.showDeviceSelector,
+              },
+              callbacks: {
+                onTogglePlay: togglePlay,
+                onStop: stop,
+                onSeek: (time: number) => {
+                  if (state.audio) {
+                    state.audio.currentTime = time;
+                    state.currentTime = time;
+                  }
+                },
+                onAddBookmark: addBookmark,
+                onChangeAudioDevice: changeAudioDevice,
+                onToggleDeviceSelector: toggleDeviceSelector,
+              },
+              showSeekBar: true,
+              showBookmarkButton: true,
+            }),
 
           // Right side - Zoom and toggle controls
           m(".right-controls", [
             hasAudio &&
-              m(".audio-device-selector-wrapper", [
-                m(FlatButton, {
-                  iconName: "volume_up",
-                  className: "white-text",
-                  title: "Select audio output device",
-                  onclick: toggleDeviceSelector,
-                }),
-                state.showDeviceSelector &&
-                  m(".audio-device-dropdown", [
-                    m("div.audio-device-header", "Audio Output"),
-                    state.audioDevices.length === 0
-                      ? m("div.audio-device-loading", "Loading devices...")
-                      : state.audioDevices.map((device) =>
-                          m(
-                            "div.audio-device-item",
-                            {
-                              key: device.deviceId,
-                              class:
-                                state.selectedAudioDevice === device.deviceId
-                                  ? "selected"
-                                  : "",
-                              onclick: () => changeAudioDevice(device.deviceId),
-                            },
-                            [
-                              m("i.material-icons", "volume_up"),
-                              m("span", device.label || "Default"),
-                              state.selectedAudioDevice === device.deviceId &&
-                                m("i.material-icons.check-icon", "check"),
-                            ]
-                          )
-                        ),
-                  ]),
-              ]),
+              m(FlatButton, {
+                iconName: "schedule",
+                className: "white-text",
+                title: `Offset: ${state.offset >= 0 ? "+" : ""}${state.offset}s (click to cycle)`,
+                onclick: cycleOffset,
+              }),
+            hasAudio &&
+              m("span.offset-text", `${state.offset >= 0 ? "+" : ""}${state.offset}s`),
             m(FlatButton, {
               iconName: "zoom_out",
               className: "white-text",
@@ -586,25 +637,6 @@ export const PracticeView: m.FactoryComponent = () => {
             ),
           ]),
 
-        // Seek bar section
-        hasAudio &&
-          m(".seek-bar-container", [
-            m("input.seek-bar", {
-              type: "range",
-              min: 0,
-              max: state.duration || 0,
-              step: 0.1,
-              value: state.currentTime,
-              style: {
-                "--progress": `${
-                  state.duration > 0
-                    ? (state.currentTime / state.duration) * 100
-                    : 0
-                }%`,
-              },
-              oninput: handleSeek,
-            }),
-          ]),
 
         // Content area
         m(".practice-content", [

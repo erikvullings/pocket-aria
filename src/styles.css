@@ -79,6 +79,28 @@ main {
   line-height: 1.8;
 }
 
+.lyrics-line {
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.lyrics-line.active-line {
+  background-color: rgba(33, 150, 243, 0.3);
+  color: #a1d5fe;
+  font-weight: 500;
+}
+
+.lyrics-line.clickable:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.offset-text {
+  font-size: 0.8em;
+  opacity: 0.8;
+  margin-right: 8px;
+}
+
 .permalink-result {
   margin-top: 20px;
 }

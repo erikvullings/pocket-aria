@@ -27,8 +27,6 @@ interface LrcEditorState {
   saveStatus: "saved" | "saving" | "unsaved";
 }
 
-const OFFSET_OPTIONS = [0, -1, -2, -3, -4, -5];
-
 export const LrcEditorView: m.FactoryComponent = () => {
   let state: LrcEditorState = {
     project: null,
@@ -54,20 +52,6 @@ export const LrcEditorView: m.FactoryComponent = () => {
     if (stored !== null) {
       state.offset = parseInt(stored, 10);
     }
-  };
-
-  // Save offset to localStorage
-  const saveOffset = (offset: number) => {
-    state.offset = offset;
-    localStorage.setItem("lrc-editor-offset", offset.toString());
-  };
-
-  // Cycle through offset options
-  const cycleOffset = () => {
-    const currentIndex = OFFSET_OPTIONS.indexOf(state.offset);
-    const nextIndex = (currentIndex + 1) % OFFSET_OPTIONS.length;
-    saveOffset(OFFSET_OPTIONS[nextIndex]);
-    m.redraw();
   };
 
   // Save timestamps to project
@@ -430,14 +414,6 @@ export const LrcEditorView: m.FactoryComponent = () => {
             }),
             m("h5.lrc-editor-title", "Timestamp Editor"),
             m(".lrc-editor-header-actions", [
-              m(FlatButton, {
-                iconName: "schedule",
-                label: `Offset: ${state.offset >= 0 ? "+" : ""}${
-                  state.offset
-                }s`,
-                className: "white-text offset-button",
-                onclick: cycleOffset,
-              }),
               m(FlatButton, {
                 iconName: "save",
                 label:
