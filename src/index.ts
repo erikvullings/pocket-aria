@@ -1,5 +1,6 @@
 import m from "mithril";
 import "mithril-materialized/index.css";
+import "./styles.css";
 import { App } from "./app";
 import { LibraryView } from './views/LibraryView';
 import { ProjectView } from './views/ProjectView';
