@@ -15,7 +15,8 @@ import {
   readFile,
 } from "@/services/import-export";
 import { getProject } from "@/services/db";
-import { FlatButton, TextArea, TextInput } from "mithril-materialized";
+import { FlatButton, TextArea, SearchSelect } from "mithril-materialized";
+import { Project } from "@/models/types";
 
 interface ImportExportState {
   loading: boolean;
@@ -23,6 +24,7 @@ interface ImportExportState {
   importPermalink: string;
   message: string;
   selectedProjectId: string;
+  projects: Project[];
 }
 
 export const ImportExportView: m.FactoryComponent = () => {
@@ -32,9 +34,18 @@ export const ImportExportView: m.FactoryComponent = () => {
     importPermalink: "",
     message: "",
     selectedProjectId: "",
+    projects: [],
+  };
+
+  const loadProjects = async () => {
+    state.projects = await getAllProjects();
+    m.redraw();
   };
 
   return {
+    oninit() {
+      loadProjects();
+    },
     view() {
       const handleExportAll = async () => {
         state.loading = true;
@@ -79,10 +90,20 @@ export const ImportExportView: m.FactoryComponent = () => {
           const project = await getProject(state.selectedProjectId);
           if (!project) {
             state.message = "Song not found";
+            state.loading = false;
+            m.redraw();
             return;
           }
-          state.permalink = await generatePermalink(project);
-          state.message = "Permalink generated!";
+          const permalink = await generatePermalink(project);
+
+          // Copy permalink to clipboard
+          const baseUrl = window.location.origin + window.location.pathname;
+          const fullUrl = `${baseUrl}#!/import-export?permalink=${encodeURIComponent(
+            permalink
+          )}`;
+
+          await navigator.clipboard.writeText(fullUrl);
+          state.message = "Permalink copied to clipboard!";
         } catch (error) {
           state.message = `Failed to generate permalink: ${error}`;
         }
@@ -166,13 +187,23 @@ export const ImportExportView: m.FactoryComponent = () => {
             m(".card", [
               m(".card-content.row", [
                 m("span.card-title.col.s12", "Export Single Song"),
-                m(TextInput, {
-                  label: "Song ID",
-                  value: state.selectedProjectId,
-                  oninput: (txt) => {
-                    state.selectedProjectId = txt;
+                m(SearchSelect<string>, {
+                  label: "Select Song",
+                  className: "col s12",
+                  options: state.projects.map((p) => ({
+                    id: p.id,
+                    label: `${p.metadata.title}${
+                      p.metadata.composer ? ` - ${p.metadata.composer}` : ""
+                    }`,
+                  })),
+                  checkedId: state.selectedProjectId
+                    ? [state.selectedProjectId]
+                    : [],
+                  onchange: (ids: string[]) => {
+                    state.selectedProjectId = ids[0] || "";
                   },
-                  placeholder: "Enter song ID",
+                  // placeholder: "Search for a song...",
+                  searchPlaceholder: "Type to search...",
                 }),
 
                 m(FlatButton, {
@@ -188,19 +219,6 @@ export const ImportExportView: m.FactoryComponent = () => {
                   onclick: handleGeneratePermalink,
                   disabled: state.loading || !state.selectedProjectId,
                 }),
-                state.permalink &&
-                  m(".permalink-result", [
-                    m("p", "Permalink (copy and share):"),
-                    m(TextArea, {
-                      value: state.permalink,
-                      rows: 3,
-                      readonly: true,
-                      onclick: (e: Event) => {
-                        (e.target as HTMLTextAreaElement).select();
-                        document.execCommand("copy");
-                      },
-                    }),
-                  ]),
               ]),
             ]),
           ]),

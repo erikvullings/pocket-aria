@@ -11,6 +11,38 @@ import { SearchView } from './views/SearchView';
 import { PlaylistsView } from './views/PlaylistsView';
 import { ImportExportView } from './views/ImportExportView';
 import { registerSW } from 'virtual:pwa-register';
+import { parsePermalink } from './services/import-export';
+import { saveProject } from './services/db';
+
+// Handle permalink query parameter from hash-based routing
+const handlePermalinkParam = async () => {
+  // Parse query params from the hash (e.g., #!/import-export?permalink=...)
+  const hash = window.location.hash;
+  const queryIndex = hash.indexOf('?');
+
+  if (queryIndex === -1) return;
+
+  const queryString = hash.substring(queryIndex + 1);
+  const urlParams = new URLSearchParams(queryString);
+  const permalinkData = urlParams.get('permalink');
+
+  if (permalinkData) {
+    try {
+      const project = parsePermalink(decodeURIComponent(permalinkData));
+      await saveProject(project);
+
+      // Navigate to the imported song (this also cleans up the URL)
+      m.route.set(`/song/${project.id}`);
+    } catch (error) {
+      console.error('Failed to import from permalink:', error);
+      // Navigate to import-export page without the query param
+      m.route.set('/import-export');
+    }
+  }
+};
+
+// Call after routes are set up
+setTimeout(handlePermalinkParam, 100);
 
 // Initialize Mithril routing
 m.route(document.body, "/library", {
