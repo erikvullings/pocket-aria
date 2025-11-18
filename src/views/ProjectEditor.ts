@@ -130,22 +130,6 @@ export const ProjectEditor: m.FactoryComponent = () => {
         project.lyrics.content = content;
       };
 
-      const handleTagInput = (e: KeyboardEvent) => {
-        const input = e.target as HTMLInputElement;
-        if (e.key === "Enter" && input.value.trim()) {
-          e.preventDefault();
-          if (!project.metadata.tags) {
-            project.metadata.tags = [];
-          }
-          project.metadata.tags.push(input.value.trim());
-          input.value = "";
-        }
-      };
-
-      const removeTag = (index: number) => {
-        project.metadata.tags?.splice(index, 1);
-      };
-
       const removeScore = (index: number) => {
         project.scores.splice(index, 1);
       };
