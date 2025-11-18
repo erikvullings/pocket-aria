@@ -39,12 +39,18 @@ export interface Score {
   filename: string;
 }
 
+export interface LrcTimestamp {
+  lineIndex: number;
+  timestamp: number; // in seconds
+}
+
 export interface Lyrics {
   id: string;
   format: LyricsFormat;
   content: string;
   translation?: string;
   translationLanguage?: string;
+  lrcTimestamps?: LrcTimestamp[];
 }
 
 export interface AudioTrack {

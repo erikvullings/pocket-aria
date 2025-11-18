@@ -350,6 +350,12 @@ export const ProjectEditor: m.FactoryComponent = () => {
               onclick: handleSave,
             }),
             " ",
+            !state.isNew && project.audioTrack && project.lyrics && m(Button, {
+              label: "Add Timestamps",
+              iconName: "schedule",
+              onclick: () => m.route.set(`/song/${project.id}/lrc-editor`),
+            }),
+            " ",
             m(Button, {
               className: "grey",
               label: "Cancel",

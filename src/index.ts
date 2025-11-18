@@ -5,6 +5,7 @@ import { LibraryView } from './views/LibraryView';
 import { ProjectView } from './views/ProjectView';
 import { ProjectEditor } from './views/ProjectEditor';
 import { PracticeView } from './views/PracticeView';
+import { LrcEditorView } from './views/LrcEditorView';
 import { SearchView } from './views/SearchView';
 import { PlaylistsView } from './views/PlaylistsView';
 import { ImportExportView } from './views/ImportExportView';
@@ -38,6 +39,9 @@ m.route(document.body, "/library", {
   },
   "/song/:id/practice": {
     render: () => m(PracticeView),
+  },
+  "/song/:id/lrc-editor": {
+    render: () => m(App, m(LrcEditorView)),
   },
   "/import-export": {
     render: () => m(App, m(ImportExportView)),
