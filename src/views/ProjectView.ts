@@ -6,7 +6,6 @@ import { copyPermalinkToClipboard } from "@/utils/permalink";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { ScoreViewer } from "@/components/ScoreViewer";
 import { LyricsViewer } from "@/components/LyricsViewer";
-import { AudioControl } from "@/components/AudioControl";
 
 interface ProjectViewState {
   project: Project | null;
