@@ -5,15 +5,55 @@ import mainImage from "../assets/main.webp";
 import { Button, IconButton, toast } from "mithril-materialized";
 import { copyPermalinkToClipboard } from "@/utils/permalink";
 
+type SortOrder = "composer-title" | "title" | "recent";
+
 interface LibraryState {
   projects: Project[];
   loading: boolean;
+  sortOrder: SortOrder;
 }
 
 export const LibraryView: m.FactoryComponent = () => {
   let state: LibraryState = {
     projects: [],
     loading: true,
+    sortOrder: "composer-title",
+  };
+
+  const sortProjects = (projects: Project[], order: SortOrder): Project[] => {
+    const sorted = [...projects];
+    switch (order) {
+      case "composer-title":
+        return sorted.sort((a, b) => {
+          const composerA = a.metadata.composer?.toLowerCase() || "";
+          const composerB = b.metadata.composer?.toLowerCase() || "";
+          if (composerA !== composerB) {
+            return composerA.localeCompare(composerB);
+          }
+          const titleA = a.metadata.title?.toLowerCase() || "";
+          const titleB = b.metadata.title?.toLowerCase() || "";
+          return titleA.localeCompare(titleB);
+        });
+      case "title":
+        return sorted.sort((a, b) => {
+          const titleA = a.metadata.title?.toLowerCase() || "";
+          const titleB = b.metadata.title?.toLowerCase() || "";
+          return titleA.localeCompare(titleB);
+        });
+      case "recent":
+        return sorted.sort((a, b) => {
+          const dateA = a.metadata.createdAt || 0;
+          const dateB = b.metadata.createdAt || 0;
+          return dateB - dateA; // Most recent first
+        });
+      default:
+        return sorted;
+    }
+  };
+
+  const setSortOrder = (order: SortOrder) => {
+    state.sortOrder = order;
+    m.redraw();
   };
 
   return {
@@ -32,19 +72,61 @@ export const LibraryView: m.FactoryComponent = () => {
         }
       };
 
+      const sortedProjects = sortProjects(state.projects, state.sortOrder);
+
       return m(".library-view.container", [
         m("h1", "Library"),
-        m(
-          ".row",
-          m(
-            ".col.s12",
+        m(".row", [
+          m(".col.s12.m6", [
             m(Button, {
               label: "New Song",
               iconName: "add",
               onclick: () => m.route.set("/song/new"),
-            })
-          )
-        ),
+            }),
+          ]),
+          m(".col.s12.m6", [
+            m(
+              ".sort-buttons",
+              {
+                style: {
+                  display: "flex",
+                  gap: "0.5rem",
+                  justifyContent: "flex-end",
+                  flexWrap: "wrap",
+                },
+              },
+              [
+                m(Button, {
+                  label: "Composer",
+                  iconName: "person",
+                  className:
+                    state.sortOrder === "composer-title"
+                      ? ""
+                      : "grey lighten-2 grey-text",
+                  onclick: () => setSortOrder("composer-title"),
+                }),
+                m(Button, {
+                  label: "Title",
+                  iconName: "sort_by_alpha",
+                  className:
+                    state.sortOrder === "title"
+                      ? ""
+                      : "grey lighten-2 grey-text",
+                  onclick: () => setSortOrder("title"),
+                }),
+                m(Button, {
+                  label: "Recent",
+                  iconName: "schedule",
+                  className:
+                    state.sortOrder === "recent"
+                      ? ""
+                      : "grey lighten-2 grey-text",
+                  onclick: () => setSortOrder("recent"),
+                }),
+              ]
+            ),
+          ]),
+        ]),
         m(
           ".row",
           state.loading
@@ -58,7 +140,7 @@ export const LibraryView: m.FactoryComponent = () => {
                 m("h5.grey-text", "No songs in your library yet"),
                 m("p.grey-text", 'Click "New Song" to add your first piece'),
               ])
-            : state.projects.map((project) =>
+            : sortedProjects.map((project) =>
                 m(".col.s12.m6.l4", { key: project.id }, [
                   m(".card", [
                     m(
