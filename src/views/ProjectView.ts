@@ -1,10 +1,12 @@
 import m from "mithril";
-import { FlatButton } from "mithril-materialized";
+import { FlatButton, IconButton, toast } from "mithril-materialized";
 import { Project } from "@/models/types";
 import { getProject } from "@/services/db";
+import { copyPermalinkToClipboard } from "@/utils/permalink";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { ScoreViewer } from "@/components/ScoreViewer";
 import { LyricsViewer } from "@/components/LyricsViewer";
+import { AudioControl } from "@/components/AudioControl";
 
 interface ProjectViewState {
   project: Project | null;
@@ -52,22 +54,40 @@ export const ProjectView: m.FactoryComponent = () => {
       return m(".project-view.container", [
         m("h1", project.metadata.title),
         m(".row", [
-          m(FlatButton, {
-            label: "Library",
+          m(IconButton, {
+            title: "Library",
             iconName: "arrow_back",
             onclick: () => m.route.set("/library"),
           }),
           " ",
-          m(FlatButton, {
-            label: "Practice",
-            iconName: "play_circle_outline",
-            onclick: () => m.route.set(`/song/${project.id}/practice`),
+          m(IconButton, {
+            title: "Edit",
+            iconName: "edit",
+            onclick: () => m.route.set(`/song/${project.id}/edit`),
+          }),
+          " ",
+          m(IconButton, {
+            title: "Share",
+            iconName: "share",
+            onclick: async () => {
+              try {
+                await copyPermalinkToClipboard(project);
+                toast({
+                  html: `Permalink copied to clipboard! Share this link to import the song.`,
+                });
+              } catch (error) {
+                console.error("Failed to generate or copy permalink:", error);
+                toast({
+                  html: "Failed to generate permalink. Please try again.",
+                });
+              }
+            },
           }),
           " ",
           m(FlatButton, {
-            label: "Edit",
-            iconName: "edit",
-            onclick: () => m.route.set(`/song/${project.id}/edit`),
+            label: "Practice",
+            iconName: "music_note",
+            onclick: () => m.route.set(`/song/${project.id}/practice`),
           }),
         ]),
 

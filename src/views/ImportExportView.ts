@@ -9,7 +9,6 @@ import {
   exportAllToJSON,
   exportProjectToJSON,
   importAllFromJSON,
-  generatePermalink,
   parsePermalink,
   downloadFile,
   readFile,
@@ -17,6 +16,7 @@ import {
 import { getProject } from "@/services/db";
 import { FlatButton, TextArea, SearchSelect } from "mithril-materialized";
 import { Project } from "@/models/types";
+import { copyPermalinkToClipboard } from "@/utils/permalink";
 
 interface ImportExportState {
   loading: boolean;
@@ -94,15 +94,8 @@ export const ImportExportView: m.FactoryComponent = () => {
             m.redraw();
             return;
           }
-          const permalink = await generatePermalink(project);
 
-          // Copy permalink to clipboard
-          const baseUrl = window.location.origin + window.location.pathname;
-          const fullUrl = `${baseUrl}#!/import-export?permalink=${encodeURIComponent(
-            permalink
-          )}`;
-
-          await navigator.clipboard.writeText(fullUrl);
+          await copyPermalinkToClipboard(project);
           state.message = "Permalink copied to clipboard!";
         } catch (error) {
           state.message = `Failed to generate permalink: ${error}`;
