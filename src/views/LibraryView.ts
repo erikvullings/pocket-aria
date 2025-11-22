@@ -2,7 +2,7 @@ import m from "mithril";
 import { Project } from "@/models/types";
 import { getAllProjects, deleteProject } from "@/services/db";
 import mainImage from "../assets/main.webp";
-import { Button, IconButton, toast } from "mithril-materialized";
+import { Button, IconButton, toast, Autocomplete } from "mithril-materialized";
 import { copyPermalinkToClipboard } from "@/utils/permalink";
 
 type SortOrder = "composer-title" | "title" | "recent";
@@ -11,6 +11,7 @@ interface LibraryState {
   projects: Project[];
   loading: boolean;
   sortOrder: SortOrder;
+  composerFilter: string;
 }
 
 export const LibraryView: m.FactoryComponent = () => {
@@ -18,6 +19,7 @@ export const LibraryView: m.FactoryComponent = () => {
     projects: [],
     loading: true,
     sortOrder: "composer-title",
+    composerFilter: "",
   };
 
   const sortProjects = (projects: Project[], order: SortOrder): Project[] => {
@@ -56,6 +58,37 @@ export const LibraryView: m.FactoryComponent = () => {
     m.redraw();
   };
 
+  const getUniqueComposers = (projects: Project[]): Record<string, null> => {
+    const composers: Record<string, null> = {};
+    projects.forEach((project) => {
+      if (project.metadata.composer) {
+        composers[project.metadata.composer] = null;
+      }
+    });
+    return composers;
+  };
+
+  const filterProjects = (projects: Project[]): Project[] => {
+    if (!state.composerFilter) {
+      return projects;
+    }
+    return projects.filter(
+      (project) =>
+        project.metadata.composer?.toLowerCase() ===
+        state.composerFilter.toLowerCase()
+    );
+  };
+
+  const handleComposerFilterChange = (value: string) => {
+    state.composerFilter = value;
+    m.redraw();
+  };
+
+  const clearComposerFilter = () => {
+    state.composerFilter = "";
+    m.redraw();
+  };
+
   return {
     async oninit() {
       state.projects = await getAllProjects();
@@ -72,10 +105,50 @@ export const LibraryView: m.FactoryComponent = () => {
         }
       };
 
-      const sortedProjects = sortProjects(state.projects, state.sortOrder);
+      const filteredProjects = filterProjects(state.projects);
+      const sortedProjects = sortProjects(filteredProjects, state.sortOrder);
+      const composerData = getUniqueComposers(state.projects);
 
       return m(".library-view.container", [
-        m("h1", "Library"),
+        m(".row", { style: { alignItems: "center", marginBottom: "1rem" } }, [
+          m(".col.s12.m6", [m("h1", { style: { margin: "0" } }, "Library")]),
+          m(".col.s12.m6", [
+            m(
+              "div",
+              {
+                style: {
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                },
+              },
+              [
+                m(
+                  "div",
+                  { style: { flex: "1" } },
+                  m(Autocomplete, {
+                    label: "Filter by Composer",
+                    iconName: "person",
+                    data: composerData,
+                    value: state.composerFilter,
+                    oninput: (value) => {
+                      state.composerFilter = value;
+                    },
+                    onAutocomplete: handleComposerFilterChange,
+                  })
+                ),
+                state.composerFilter &&
+                  m(IconButton, {
+                    iconName: "close",
+                    title: "Clear filter",
+                    onclick: clearComposerFilter,
+                    className: "grey-text",
+                    style: { marginTop: "1rem" },
+                  }),
+              ]
+            ),
+          ]),
+        ]),
         m(".row", [
           m(".col.s12.m6", [
             m(Button, {
