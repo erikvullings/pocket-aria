@@ -10,6 +10,10 @@ export type ScoreType = 'musicxml' | 'pdf' | 'image';
 
 export type LyricsFormat = 'text' | 'markdown' | 'html';
 
+export type ContentType = 'classical' | 'karaoke' | 'language-learning' | 'other';
+
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
+
 export interface Metadata {
   title: string;
   composer?: string;
@@ -19,6 +23,20 @@ export interface Metadata {
   voiceType?: VoiceType;
   description?: string;
   createdAt: number;
+
+  // Content categorization
+  contentType?: ContentType;
+
+  // Classical singing specific
+  operaOrWork?: string;
+  characterRole?: string;
+
+  // Karaoke specific
+  artist?: string;
+  difficulty?: Difficulty;
+
+  // Language learning specific
+  language?: string;
 }
 
 export interface CuePoint {

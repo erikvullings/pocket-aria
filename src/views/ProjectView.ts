@@ -96,16 +96,60 @@ export const ProjectView: m.FactoryComponent = () => {
             m(".card", [
               m(".card-content", [
                 m("span.card-title", "Information"),
+
+                // Content Type
+                project.metadata.contentType &&
+                  m("p", [
+                    m("strong", "Type: "),
+                    project.metadata.contentType === "language-learning"
+                      ? "Language Learning"
+                      : project.metadata.contentType.charAt(0).toUpperCase() + project.metadata.contentType.slice(1),
+                  ]),
+
+                // Classical-specific fields
                 project.metadata.composer &&
                   m("p", [
                     m("strong", "Composer: "),
                     project.metadata.composer,
+                  ]),
+                project.metadata.operaOrWork &&
+                  m("p", [
+                    m("strong", "Opera / Work: "),
+                    project.metadata.operaOrWork,
+                  ]),
+                project.metadata.characterRole &&
+                  m("p", [
+                    m("strong", "Character / Role: "),
+                    project.metadata.characterRole,
                   ]),
                 project.metadata.voiceType &&
                   m("p", [
                     m("strong", "Voice Type: "),
                     project.metadata.voiceType,
                   ]),
+
+                // Karaoke-specific fields
+                project.metadata.artist &&
+                  m("p", [
+                    m("strong", "Artist: "),
+                    project.metadata.artist,
+                  ]),
+
+                // Language learning-specific fields
+                project.metadata.language &&
+                  m("p", [
+                    m("strong", "Language: "),
+                    project.metadata.language,
+                  ]),
+
+                // Difficulty (karaoke and language learning)
+                project.metadata.difficulty &&
+                  m("p", [
+                    m("strong", "Difficulty: "),
+                    project.metadata.difficulty.charAt(0).toUpperCase() + project.metadata.difficulty.slice(1),
+                  ]),
+
+                // Common fields
                 project.metadata.genre &&
                   m("p", [m("strong", "Genre: "), project.metadata.genre]),
                 project.metadata.year &&

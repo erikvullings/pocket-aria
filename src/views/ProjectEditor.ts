@@ -7,7 +7,7 @@ import {
   TextArea,
   TextInput,
 } from "mithril-materialized";
-import { Project, Genre, VoiceType, Score } from "@/models/types";
+import { Project, Genre, VoiceType, Score, ContentType, Difficulty } from "@/models/types";
 import { saveProject, getProject, generateId } from "@/services/db";
 
 interface ProjectEditorState {
@@ -26,6 +26,8 @@ const voiceTypes: VoiceType[] = [
   "bass",
   "other",
 ];
+const contentTypes: ContentType[] = ["classical", "karaoke", "language-learning", "other"];
+const difficulties: Difficulty[] = ["easy", "medium", "hard", "expert"];
 
 export const ProjectEditor: m.FactoryComponent = () => {
   let state: ProjectEditorState = {
@@ -151,12 +153,74 @@ export const ProjectEditor: m.FactoryComponent = () => {
                   isMandatory: true,
                 }),
 
-                // Composer
-                m(TextInput, {
-                  label: "Composer",
-                  value: project.metadata.composer,
-                  oninput: (composer) => (project.metadata.composer = composer),
+                // Content Type
+                m(Select<ContentType>, {
+                  label: "Content Type",
+                  helperText: "What is this content used for?",
+                  checkedId: project.metadata.contentType,
+                  options: contentTypes.map((type) => ({
+                    id: type,
+                    label: type === "language-learning" ? "Language Learning" : type.charAt(0).toUpperCase() + type.slice(1),
+                  })),
+                  onchange: (s) => (project.metadata.contentType = s[0]),
                 }),
+
+                // Composer (for classical)
+                (project.metadata.contentType === "classical" || !project.metadata.contentType) &&
+                  m(TextInput, {
+                    label: "Composer",
+                    value: project.metadata.composer,
+                    oninput: (composer) => (project.metadata.composer = composer),
+                  }),
+
+                // Artist (for karaoke)
+                project.metadata.contentType === "karaoke" &&
+                  m(TextInput, {
+                    label: "Artist",
+                    helperText: "Original artist or performer",
+                    value: project.metadata.artist,
+                    oninput: (artist) => (project.metadata.artist = artist),
+                  }),
+
+                // Opera/Work (for classical)
+                project.metadata.contentType === "classical" &&
+                  m(TextInput, {
+                    label: "Opera / Work",
+                    helperText: "e.g., La Bohème, Messiah",
+                    value: project.metadata.operaOrWork,
+                    oninput: (work) => (project.metadata.operaOrWork = work),
+                  }),
+
+                // Character/Role (for classical)
+                project.metadata.contentType === "classical" &&
+                  m(TextInput, {
+                    label: "Character / Role",
+                    helperText: "e.g., Mimì, Papageno",
+                    value: project.metadata.characterRole,
+                    oninput: (role) => (project.metadata.characterRole = role),
+                  }),
+
+                // Language (for language learning)
+                project.metadata.contentType === "language-learning" &&
+                  m(TextInput, {
+                    label: "Language",
+                    helperText: "Primary language of the content",
+                    value: project.metadata.language,
+                    oninput: (lang) => (project.metadata.language = lang),
+                  }),
+
+                // Difficulty (for karaoke and language learning)
+                (project.metadata.contentType === "karaoke" ||
+                  project.metadata.contentType === "language-learning") &&
+                  m(Select<Difficulty>, {
+                    label: "Difficulty",
+                    checkedId: project.metadata.difficulty,
+                    options: difficulties.map((diff) => ({
+                      id: diff,
+                      label: diff.charAt(0).toUpperCase() + diff.slice(1),
+                    })),
+                    onchange: (s) => (project.metadata.difficulty = s[0]),
+                  }),
 
                 // Genre
                 m(Select<Genre>, {
@@ -166,16 +230,17 @@ export const ProjectEditor: m.FactoryComponent = () => {
                   onchange: (s) => (project.metadata.genre = s[0]),
                 }),
 
-                // Voice Type
-                m(Select<VoiceType>, {
-                  label: "Voice Type",
-                  checkedId: project.metadata.voiceType,
-                  options: voiceTypes.map((genre) => ({
-                    id: genre,
-                    label: genre,
-                  })),
-                  onchange: (s) => (project.metadata.voiceType = s[0]),
-                }),
+                // Voice Type (for classical only)
+                (project.metadata.contentType === "classical" || !project.metadata.contentType) &&
+                  m(Select<VoiceType>, {
+                    label: "Voice Type",
+                    checkedId: project.metadata.voiceType,
+                    options: voiceTypes.map((voice) => ({
+                      id: voice,
+                      label: voice,
+                    })),
+                    onchange: (s) => (project.metadata.voiceType = s[0]),
+                  }),
 
                 // Year
                 m(NumberInput, {

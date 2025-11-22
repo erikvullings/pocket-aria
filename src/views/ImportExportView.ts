@@ -14,7 +14,12 @@ import {
   readFile,
 } from "@/services/import-export";
 import { getProject } from "@/services/db";
-import { FlatButton, TextArea, SearchSelect } from "mithril-materialized";
+import {
+  FlatButton,
+  TextArea,
+  SearchSelect,
+  toast,
+} from "mithril-materialized";
 import { Project } from "@/models/types";
 import { copyPermalinkToClipboard } from "@/utils/permalink";
 
@@ -54,9 +59,9 @@ export const ImportExportView: m.FactoryComponent = () => {
           const playlists = await getAllPlaylists();
           const json = await exportAllToJSON(projects, playlists);
           downloadFile(json, `pocketaria-export-${Date.now()}.json`);
-          state.message = "Export successful!";
+          toast({ html: "Export successful!" });
         } catch (error) {
-          state.message = `Export failed: ${error}`;
+          toast({ html: "Export failed: ${error}", classes: "red" });
         }
         state.loading = false;
         m.redraw();
@@ -74,9 +79,9 @@ export const ImportExportView: m.FactoryComponent = () => {
           }
           const json = await exportProjectToJSON(project);
           downloadFile(json, `${project.metadata.title}-${Date.now()}.json`);
-          state.message = "Song exported successfully!";
+          toast({ html: "Song exported successfully!" });
         } catch (error) {
-          state.message = `Export failed: ${error}`;
+          toast({ html: "Export failed: ${error}", classes: "red" });
         }
         state.loading = false;
         m.redraw();
@@ -96,9 +101,12 @@ export const ImportExportView: m.FactoryComponent = () => {
           }
 
           await copyPermalinkToClipboard(project);
-          state.message = "Permalink copied to clipboard!";
+          toast({ html: "Permalink copied to clipboard!" });
         } catch (error) {
-          state.message = `Failed to generate permalink: ${error}`;
+          toast({
+            html: "Failed to generate permalink: ${error}",
+            classes: "red",
+          });
         }
         state.loading = false;
         m.redraw();
@@ -111,10 +119,10 @@ export const ImportExportView: m.FactoryComponent = () => {
         try {
           const project = await parsePermalink(state.importPermalink);
           await saveProject(project);
-          state.message = "Song imported successfully!";
+          toast({ html: "Song imported successfully!" });
           state.importPermalink = "";
         } catch (error) {
-          state.message = `Import failed: ${error}`;
+          toast({ html: "Import failed: ${error}", classes: "red" });
         }
         state.loading = false;
         m.redraw();
@@ -136,10 +144,11 @@ export const ImportExportView: m.FactoryComponent = () => {
           for (const playlist of data.playlists) {
             await savePlaylist(playlist);
           }
-
-          state.message = `Imported ${data.projects.length} project(s) and ${data.playlists.length} playlist(s)`;
+          toast({
+            html: `Imported ${data.projects.length} project(s) and ${data.playlists.length} playlist(s)`,
+          });
         } catch (error) {
-          state.message = `Import failed: ${error}`;
+          toast({ html: "Import failed: ${error}", classes: "red" });
         }
         state.loading = false;
         m.redraw();

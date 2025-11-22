@@ -6,7 +6,7 @@ let searchIndex: MiniSearch<Project> | null = null;
 export function initSearchIndex(projects: Project[]): void {
   searchIndex = new MiniSearch<Project>({
     idField: 'id',
-    fields: ['title', 'composer', 'description', 'tags'],
+    fields: ['title', 'composer', 'artist', 'description', 'tags', 'language', 'operaOrWork', 'characterRole'],
     storeFields: ['id', 'metadata', 'audioTrack', 'scores', 'lyrics', 'cuePoints'],
     extractField: (document: Project, fieldName: string) => {
       // Handle ID field
@@ -15,8 +15,12 @@ export function initSearchIndex(projects: Project[]): void {
       // Extract nested metadata fields for indexing
       if (fieldName === 'title') return document.metadata.title;
       if (fieldName === 'composer') return document.metadata.composer || '';
+      if (fieldName === 'artist') return document.metadata.artist || '';
       if (fieldName === 'description') return document.metadata.description || '';
       if (fieldName === 'tags') return document.metadata.tags?.join(' ') || '';
+      if (fieldName === 'language') return document.metadata.language || '';
+      if (fieldName === 'operaOrWork') return document.metadata.operaOrWork || '';
+      if (fieldName === 'characterRole') return document.metadata.characterRole || '';
 
       // Store entire nested objects
       if (fieldName === 'metadata') return document.metadata;
@@ -28,7 +32,7 @@ export function initSearchIndex(projects: Project[]): void {
       return '';
     },
     searchOptions: {
-      boost: { title: 2, composer: 1.5 },
+      boost: { title: 2, composer: 1.5, artist: 1.5, operaOrWork: 1.3 },
       fuzzy: 0.2,
       prefix: true
     }

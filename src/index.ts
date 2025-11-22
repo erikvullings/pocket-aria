@@ -9,6 +9,8 @@ import { PracticeView } from './views/PracticeView';
 import { LrcEditorView } from './views/LrcEditorView';
 import { SearchView } from './views/SearchView';
 import { PlaylistsView } from './views/PlaylistsView';
+import { PlaylistEditor } from './views/PlaylistEditor';
+import { PlaylistViewer } from './views/PlaylistViewer';
 import { ImportExportView } from './views/ImportExportView';
 import { registerSW } from 'virtual:pwa-register';
 import { parsePermalink } from './services/import-export';
@@ -58,8 +60,14 @@ m.route(document.body, "/library", {
   "/playlists": {
     render: () => m(App, m(PlaylistsView)),
   },
+  "/playlist/new": {
+    render: () => m(App, m(PlaylistEditor)),
+  },
+  "/playlist/:id/edit": {
+    render: () => m(App, m(PlaylistEditor)),
+  },
   "/playlist/:id": {
-    render: () => m(App, m(PlaylistsView)),
+    render: () => m(App, m(PlaylistViewer)),
   },
   "/song/new": {
     render: () => m(App, m(ProjectEditor)),

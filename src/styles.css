@@ -1127,3 +1127,26 @@ main {
 .pointer {
   cursor: pointer;
 }
+
+/* Hide button labels on small screens (mobile) */
+@media screen and (max-width: 600px) {
+  .hide-label-on-small-only {
+    min-width: 40px !important;
+    padding: 0 8px !important;
+    font-size: 0 !important;
+  }
+
+  .hide-label-on-small-only i.material-icons {
+    font-size: 24px !important;
+    margin: 0 !important;
+  }
+
+  /* Keep button row inline on mobile */
+  .library-view .row .col.s12.m6 {
+    width: 50% !important;
+  }
+
+  .library-view .sort-buttons {
+    justify-content: flex-start !important;
+  }
+}
