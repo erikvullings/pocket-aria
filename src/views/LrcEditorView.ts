@@ -1,7 +1,12 @@
 import m from "mithril";
 import { FlatButton } from "mithril-materialized";
 import { Project, LrcTimestamp } from "../models/types";
-import { getProject, saveProject, getSetting, saveSetting } from "../services/db";
+import {
+  getProject,
+  saveProject,
+  getSetting,
+  saveSetting,
+} from "../services/db";
 import { formatLrcTimestamp } from "../utils/lrc";
 import {
   AudioControl,
@@ -249,10 +254,21 @@ export const LrcEditorView: m.FactoryComponent = () => {
     }
   };
 
+  // Reset timestamp for current line
+  const resetTimestamp = async () => {
+    const currentTimestamp = state.timestamps.get(state.activeLineIndex);
+    if (currentTimestamp !== undefined) {
+      state.timestamps.delete(state.activeLineIndex);
+      await saveTimestamps();
+      m.redraw();
+    }
+  };
+
   // Keyboard handler
   const handleKeyDown = (e: KeyboardEvent) => {
     switch (e.key) {
       case " ": // Space
+      case "Enter":
         e.preventDefault();
         setTimestamp();
         break;
@@ -271,6 +287,11 @@ export const LrcEditorView: m.FactoryComponent = () => {
       case "ArrowRight":
         e.preventDefault();
         adjustTimestamp(0.25);
+        break;
+      case "Delete":
+      case "Backspace":
+        e.preventDefault();
+        resetTimestamp();
         break;
     }
   };
@@ -402,7 +423,7 @@ export const LrcEditorView: m.FactoryComponent = () => {
         onToggleDeviceSelector: toggleDeviceSelector,
       };
 
-      return m(".lrc-editor-view", [
+      return m(".lrc-editor-view.container", [
         // Fixed header container
         m(".lrc-editor-fixed-header", [
           // Top header with back button and title
