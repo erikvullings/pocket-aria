@@ -28,7 +28,7 @@ const handlePermalinkParam = async () => {
 
   if (permalinkData) {
     try {
-      const project = parsePermalink(decodeURIComponent(permalinkData));
+      const project = await parsePermalink(decodeURIComponent(permalinkData));
       await saveProject(project);
 
       // Navigate to the imported song (this also cleans up the URL)

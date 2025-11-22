@@ -1123,3 +1123,7 @@ main {
   min-width: 80px;
   text-align: right;
 }
+
+.pointer {
+  cursor: pointer;
+}

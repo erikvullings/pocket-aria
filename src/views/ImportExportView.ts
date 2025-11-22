@@ -109,7 +109,7 @@ export const ImportExportView: m.FactoryComponent = () => {
 
         state.loading = true;
         try {
-          const project = parsePermalink(state.importPermalink);
+          const project = await parsePermalink(state.importPermalink);
           await saveProject(project);
           state.message = "Song imported successfully!";
           state.importPermalink = "";
