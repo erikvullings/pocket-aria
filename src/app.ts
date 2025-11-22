@@ -1,5 +1,6 @@
 import m from "mithril";
 import { initDB } from "./services/db";
+import { Sidenav, SidenavItem } from "mithril-materialized";
 import mainImage from "./assets/main.webp";
 
 interface NavItem {
@@ -16,6 +17,8 @@ const navItems: NavItem[] = [
 ];
 
 export const App: m.FactoryComponent = () => {
+  let isSidenavOpen = false;
+
   return {
     async oninit() {
       // Initialize database
@@ -24,10 +27,51 @@ export const App: m.FactoryComponent = () => {
 
     view(vnode) {
       return m(".app", [
+        // Mobile Sidenav using mithril-materialized
+        m(
+          Sidenav,
+          {
+            id: "mobile-nav",
+            isOpen: isSidenavOpen,
+            onToggle: (open: boolean) => {
+              isSidenavOpen = open;
+            },
+            position: "left",
+            showHamburger: false, // We'll use our own hamburger button in the navbar
+            showBackdrop: true,
+            closeOnBackdropClick: true,
+            closeOnEscape: true,
+          },
+          navItems.map((item) =>
+            m(SidenavItem, {
+              key: item.href,
+              text: item.label,
+              icon: item.icon,
+              onclick: () => {
+                isSidenavOpen = false;
+                m.route.set(item.href.replace("#!", ""));
+              },
+            })
+          )
+        ),
+
         // Navigation
         m("nav.blue.darken-2", [
           m(".nav-wrapper.container", [
             m("a.brand-logo", { href: "#!/library" }, "PocketAria"),
+            // Hamburger menu button for mobile
+            m(
+              "a.sidenav-trigger",
+              {
+                href: "#",
+                onclick: (e: Event) => {
+                  e.preventDefault();
+                  isSidenavOpen = !isSidenavOpen;
+                },
+              },
+              [m("i.material-icons", "menu")]
+            ),
+            // Desktop navigation
             m(
               "ul.right.hide-on-med-and-down",
               navItems.map((item) =>
