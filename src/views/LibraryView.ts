@@ -2,7 +2,7 @@ import m from "mithril";
 import { Project } from "@/models/types";
 import { getAllProjects, deleteProject } from "@/services/db";
 import mainImage from "../assets/main.webp";
-import { IconButton } from "mithril-materialized";
+import { Button, IconButton } from "mithril-materialized";
 
 interface LibraryState {
   projects: Project[];
@@ -34,35 +34,32 @@ export const LibraryView: m.FactoryComponent = () => {
       return m(".library-view.container", [
         m("h1", "Library"),
         m(".row", [
-          m(".col.s12", [
-            m(
-              "a.btn.waves-effect.waves-light",
-              {
-                href: "#!/song/new",
-              },
-              [m("i.material-icons.left", "add"), "New Song"]
-            ),
-          ]),
+          m(Button, {
+            label: "New Song",
+            iconName: "add",
+            onclick: () => m.route.set("/song/new"),
+          }),
         ]),
         state.loading
           ? m(".progress", [m(".indeterminate")])
           : state.projects.length === 0
-          ? m(".row", [
-              m(".col.s12.center-align", [
-                m("img.logo-large", {
-                  src: mainImage,
-                  alt: "PocketAria",
-                }),
-                m("h5.grey-text", "No songs in your library yet"),
-                m("p.grey-text", 'Click "New Song" to add your first piece'),
-              ]),
+          ? m(".col.s12.center-align", [
+              m("img.logo-large", {
+                src: mainImage,
+                alt: "PocketAria",
+              }),
+              m("h5.grey-text", "No songs in your library yet"),
+              m("p.grey-text", 'Click "New Song" to add your first piece'),
             ])
-          : m(
-              ".row",
-              state.projects.map((project) =>
-                m(".col.s12.m6.l4", { key: project.id }, [
-                  m(".card", [
-                    m(".card-content", [
+          : state.projects.map((project) =>
+              m(".col.s12.m6.l4", { key: project.id }, [
+                m(".card", [
+                  m(
+                    ".card-content",
+                    {
+                      onclick: () => m.route.set(`/song/${project.id}`),
+                    },
+                    [
                       m("span.card-title", project.metadata.title),
                       project.metadata.composer &&
                         m("p", `Composer: ${project.metadata.composer}`),
@@ -70,34 +67,34 @@ export const LibraryView: m.FactoryComponent = () => {
                         m("p", `Voice: ${project.metadata.voiceType}`),
                       project.metadata.genre &&
                         m("p.grey-text", project.metadata.genre),
-                    ]),
-                    m(".card-action", [
-                      m(IconButton, {
-                        title: "Practice",
-                        onclick: () =>
-                          m.route.set(`/song/${project.id}/practice`),
-                        iconName: "play_circle_outline",
-                      }),
-                      m(IconButton, {
-                        title: "View",
-                        onclick: () => m.route.set(`/song/${project.id}`),
-                        iconName: "remove_red_eye",
-                      }),
-                      m(IconButton, {
-                        title: "Edit",
-                        onclick: () => m.route.set(`/song/${project.id}/edit`),
-                        iconName: "edit",
-                      }),
-                      m(IconButton, {
-                        title: "Delete",
-                        onclick: () => handleDelete(project.id),
-                        iconName: "delete",
-                        className: "red-text",
-                      }),
-                    ]),
+                    ]
+                  ),
+                  m(".card-action", [
+                    m(IconButton, {
+                      title: "Practice",
+                      onclick: () =>
+                        m.route.set(`/song/${project.id}/practice`),
+                      iconName: "play_circle_outline",
+                    }),
+                    m(IconButton, {
+                      title: "View",
+                      onclick: () => m.route.set(`/song/${project.id}`),
+                      iconName: "remove_red_eye",
+                    }),
+                    m(IconButton, {
+                      title: "Edit",
+                      onclick: () => m.route.set(`/song/${project.id}/edit`),
+                      iconName: "edit",
+                    }),
+                    m(IconButton, {
+                      title: "Delete",
+                      onclick: () => handleDelete(project.id),
+                      iconName: "delete",
+                      className: "red-text",
+                    }),
                   ]),
-                ])
-              )
+                ]),
+              ])
             ),
       ]);
     },
